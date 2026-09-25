@@ -1,0 +1,31 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#ED1C24"
+        android:pathData="M0,0h108v108h-108z" />
+    <!-- Vagao -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M38,24h32a10,10 0,0 1,10 10v38a10,10 0,0 1,-10 10h-32a10,10 0,0 1,-10 -10v-38a10,10 0,0 1,10 -10z" />
+    <!-- Janela -->
+    <path
+        android:fillColor="#ED1C24"
+        android:pathData="M36,36h36v18h-36z" />
+    <!-- Farois -->
+    <path
+        android:fillColor="#ED1C24"
+        android:pathData="M38,64m-4,0a4,4 0,1 1,8 0a4,4 0,1 1,-8 0" />
+    <path
+        android:fillColor="#ED1C24"
+        android:pathData="M70,64m-4,0a4,4 0,1 1,8 0a4,4 0,1 1,-8 0" />
+    <!-- Trilhos -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M30,88h14l-6,10h-14z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M64,88h14l6,10h-14z" />
+</vector>

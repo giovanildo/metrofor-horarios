@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Metrô Fortaleza</string>
+    <string name="subtitle">Horários das linhas do Metrofor</string>
+    <string name="unofficial">App não oficial. Dados do GTFS público do Metrofor.</string>
+    <string name="back">Voltar</string>
+    <string name="next_departures">Próximas partidas</string>
+    <string name="all_departures">Todos os horários</string>
+    <string name="no_more_today">Sem mais partidas hoje neste sentido.</string>
+    <string name="tomorrow">amanhã</string>
+    <string name="now">agora</string>
+    <string name="in_minutes">em %1$d min</string>
+    <string name="in_hours">em %1$dh%2$02d</string>
+    <string name="same_schedule_warning">O Metrofor publica o mesmo quadro para todos os dias da semana. Em feriados, confira o horário oficial.</string>
+    <plurals name="stations_count">
+        <item quantity="one">%1$d estação</item>
+        <item quantity="other">%1$d estações</item>
+    </plurals>
+
+    <string name="home_invite">Veja de uma vez a próxima partida da estação mais próxima de você.</string>
+    <string name="home_use_location">Usar minha localização</string>
+    <string name="home_locating">Procurando sua localização…</string>
+    <string name="home_distance">%1$s de você</string>
+    <string name="home_your_station">Sua estação</string>
+    <string name="home_denied">Sem permissão de localização. Você ainda pode abrir uma estação e tocar na estrela para fixá-la aqui.</string>
+    <string name="home_no_fix">Não consegui obter sua localização. Tente de novo em um lugar aberto, ou fixe uma estação pela estrela.</string>
+    <string name="home_try_again">Tentar de novo</string>
+    <string name="home_no_departures">sem partidas hoje</string>
+    <string name="pin_station">Fixar esta estação na tela inicial</string>
+    <string name="unpin_station">Desafixar esta estação</string>
+
+    <string name="bike_title">Bicicletar mais próximo</string>
+    <string name="bike_number">nº %1$d</string>
+    <string name="bike_details">%1$s · %2$s</string>
+    <plurals name="bike_slots">
+        <item quantity="one">%1$d vaga</item>
+        <item quantity="other">%1$d vagas</item>
+    </plurals>
+    <string name="bike_no_realtime">Capacidade da estação, não disponibilidade agora.</string>
+</resources>
