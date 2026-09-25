@@ -156,3 +156,32 @@ plugin `org.jetbrains.kotlin.android` aqui, só o do compilador do Compose.
 em 36 de propósito: subir o `targetSdk` muda comportamento em tempo de
 execução, e o app ainda não foi testado em aparelho. É a origem do único aviso
 de lint que sobrou.
+
+## Licença
+
+Copyright (C) 2026 Giovanildo
+
+Este programa é software livre: você pode redistribuí-lo e/ou modificá-lo sob
+os termos da Licença Pública Geral GNU, conforme publicada pela Free Software
+Foundation, na versão 3 da licença ou (a seu critério) qualquer versão
+posterior.
+
+Este programa é distribuído na esperança de que seja útil, mas **sem nenhuma
+garantia**, nem mesmo a garantia implícita de comercialização ou adequação a
+um fim específico. Veja a [Licença Pública Geral GNU](LICENSE) para mais
+detalhes.
+
+### Sobre os dados
+
+A licença acima cobre **o código**, não os dados. O `metrofor.db` versionado
+aqui é gerado a partir de fontes públicas de terceiros, cada uma com seus
+próprios termos:
+
+- **Horários e estações do metrô** — feed GTFS publicado pelo
+  [Metrofor](https://www.ce.gov.br/metrofor/gtfs/), empresa do Governo do
+  Estado do Ceará.
+- **Estações do Bicicletar** — GeoJSON publicado pela AMC no
+  [portal de dados abertos da Prefeitura de Fortaleza](https://dados.fortaleza.ce.gov.br/organization/amc).
+
+Este é um app **não oficial**, sem vínculo com o Metrofor, a AMC ou a
+Prefeitura de Fortaleza.
