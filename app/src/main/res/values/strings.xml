@@ -46,4 +46,12 @@
     <string name="bike_boarding_not_today">Hoje não há horário para embarcar com bike no trem</string>
 
     <string name="sunday_warning">Aos domingos o metrô e os VLTs normalmente não circulam. Em dias de operação especial (eleição, ENEM, eventos), os horários podem ser diferentes destes.</string>
+
+    <string name="news_title">Notícias do Metrofor</string>
+    <string name="news_synced_at">Atualizado em %1$s</string>
+    <string name="news_never_synced">Ainda não sincronizado — precisa de internet</string>
+    <string name="news_empty">Nenhuma notícia nos últimos 30 dias.</string>
+    <string name="news_refresh">Atualizar notícias</string>
+    <string name="news_show_more">Ver mais</string>
+    <string name="news_show_less">Ver menos</string>
 </resources>

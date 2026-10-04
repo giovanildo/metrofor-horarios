@@ -2,7 +2,9 @@
 
 App Android **não oficial** com os horários das linhas do Metrofor (Fortaleza,
 Sobral e Cariri). O quadro de horários vai embarcado no APK, então as consultas
-funcionam inteiramente offline — o app nunca acessa a rede.
+funcionam inteiramente offline. A única coisa que usa a rede são as
+**manchetes de notícias** (veja abaixo), e sem internet o app mostra a última
+lista baixada.
 
 A tela inicial destaca uma estação com a próxima partida de cada sentido. Ela
 pode vir de duas fontes:
@@ -40,6 +42,15 @@ partir das 15h. Os VLTs não aparecem no regulamento, por isso ficam de fora; no
 domingo o aviso de bike some, porque nesse dia só há operação especial e a regra
 dela não é conhecida. As regras estão fixas em `data/BikeBoarding.kt` — se o
 Metrofor mudar o regulamento, é lá que se mexe.
+
+A tela inicial termina com as **notícias do Metrofor**: só manchetes, fonte e
+data, para bater o olho e saber se vem alguma mudança (operação especial em
+eleição e ENEM, obras, feriado). Nem o site do Metrofor nem o do Governo do
+Ceará têm RSS ou API, então as manchetes vêm da busca RSS do Google Notícias
+(`metrofor OR "metrô de fortaleza" OR "VLT" Ceará`), limitada aos últimos 30
+dias. A lista fica guardada no aparelho e é baixada de novo ao abrir o app se
+tiver mais de 3 horas, ou pelo botão de atualizar. Não é uma API oficial: se
+ela falhar, a lista antiga continua na tela.
 
 ## Como os dados chegam aqui
 

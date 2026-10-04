@@ -23,6 +23,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import io.github.giova.metrofortaleza.data.BIKE_NEAR_YOU_MAX_METERS
 import io.github.giova.metrofortaleza.data.LocationSource
+import io.github.giova.metrofortaleza.data.NewsCache
+import io.github.giova.metrofortaleza.data.NewsFeed
 import io.github.giova.metrofortaleza.data.PinnedStation
 import io.github.giova.metrofortaleza.data.ScheduleRepository
 import io.github.giova.metrofortaleza.data.Station
@@ -36,6 +38,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 private const val TICK_MILLIS = 15_000L
+
+/** Manchetes mais velhas que isso são baixadas de novo ao abrir o app. */
+private const val NEWS_STALE_MILLIS = 3L * 60 * 60 * 1000
 
 @Composable
 fun AppRoot() {
@@ -160,6 +165,31 @@ fun AppRoot() {
         }
     }
 
+    // ------------------------------------------------------------ notícias --
+    val newsCache = remember(context) { NewsCache(context) }
+    var headlines by remember { mutableStateOf(newsCache.load()) }
+    var newsSyncedAt by remember { mutableStateOf(newsCache.syncedAt) }
+    var newsSyncing by remember { mutableStateOf(false) }
+
+    fun syncNews() {
+        if (newsSyncing) return
+        newsSyncing = true
+        scope.launch {
+            // Sem rede ou com o feed fora do ar, fica a lista antiga.
+            withContext(Dispatchers.IO) { runCatching { NewsFeed.fetch() } }
+                .onSuccess {
+                    newsCache.save(it)
+                    headlines = it
+                    newsSyncedAt = newsCache.syncedAt
+                }
+            newsSyncing = false
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (System.currentTimeMillis() - newsCache.syncedAt > NEWS_STALE_MILLIS) syncNews()
+    }
+
     fun openStation(station: Station) {
         routeId = station.routeId
         stopId = station.stopId
@@ -227,6 +257,12 @@ fun AppRoot() {
                         onOpenStation = ::openStation,
                     )
                     homeBike?.let { HomeBikeCard(it) }
+                    NewsCard(
+                        headlines = headlines,
+                        syncedAt = newsSyncedAt,
+                        syncing = newsSyncing,
+                        onRefresh = ::syncNews,
+                    )
                 }
             },
         )
