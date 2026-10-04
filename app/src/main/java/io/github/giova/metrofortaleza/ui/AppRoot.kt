@@ -23,10 +23,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import io.github.giova.metrofortaleza.data.BIKE_NEAR_YOU_MAX_METERS
 import io.github.giova.metrofortaleza.data.LocationSource
+import io.github.giova.metrofortaleza.data.MetroforDatabase
 import io.github.giova.metrofortaleza.data.NewsCache
 import io.github.giova.metrofortaleza.data.NewsFeed
 import io.github.giova.metrofortaleza.data.PinnedStation
 import io.github.giova.metrofortaleza.data.ScheduleRepository
+import io.github.giova.metrofortaleza.data.ScheduleSource
+import io.github.giova.metrofortaleza.data.ScheduleStore
 import io.github.giova.metrofortaleza.data.Station
 import io.github.giova.metrofortaleza.data.nearestBikeTo
 import io.github.giova.metrofortaleza.data.nearestTo
@@ -46,9 +49,28 @@ private const val NEWS_STALE_MILLIS = 3L * 60 * 60 * 1000
 fun AppRoot() {
     val context = LocalContext.current
 
+    // O GTFS do Metrofor traz a grade do dia; baixamos uma vez por dia e o
+    // repositório é recriado quando chega grade nova ou o dia vira.
+    var today by remember { mutableStateOf(ScheduleStore.today()) }
+    var scheduleVersion by remember { mutableIntStateOf(0) }
+    var scheduleSyncing by remember { mutableStateOf(false) }
+    var scheduleSyncFailed by remember { mutableStateOf(false) }
+    var scheduleRequest by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(today, scheduleRequest) {
+        if (scheduleRequest == 0 && !ScheduleStore.needsSync(context)) return@LaunchedEffect
+        scheduleSyncing = true
+        val result = withContext(Dispatchers.IO) {
+            runCatching { ScheduleStore.sync(context, MetroforDatabase.bundledFile(context)) }
+        }
+        scheduleSyncFailed = result.isFailure
+        scheduleSyncing = false
+        if (result.isSuccess) scheduleVersion++
+    }
+
     // A primeira abertura copia o banco de assets; isso sai da thread principal.
     var repository by remember { mutableStateOf<ScheduleRepository?>(null) }
-    LaunchedEffect(context) {
+    LaunchedEffect(context, today, scheduleVersion) {
         repository = withContext(Dispatchers.IO) { ScheduleRepository(context) }
     }
 
@@ -66,7 +88,6 @@ fun AppRoot() {
 
     val routes = remember(repo) { repo.routes() }
     val bikeStations = remember(repo) { repo.bikeStations() }
-    val sameScheduleWarning = remember(repo) { repo.meta("same_schedule_every_day") == "1" }
 
     val route = routeId?.let { id -> remember(id) { repo.route(id) } }
     val stop = stopId?.let { id -> remember(id) { repo.stop(id) } }
@@ -82,6 +103,7 @@ fun AppRoot() {
         while (true) {
             delay(TICK_MILLIS)
             now = nowMinutes()
+            today = ScheduleStore.today()
         }
     }
 
@@ -214,7 +236,7 @@ fun AppRoot() {
                 departuresFor = { direction ->
                     repo.departures(stop.id, route.id, direction.id)
                 },
-                showSameScheduleWarning = sameScheduleWarning,
+                schedule = repo.source,
                 bike = bike,
                 isPinned = isPinned,
                 onTogglePin = {
@@ -243,9 +265,16 @@ fun AppRoot() {
             onRouteClick = { routeId = it.id },
             header = {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    ScheduleStatus(
+                        source = repo.source,
+                        syncing = scheduleSyncing,
+                        failed = scheduleSyncFailed,
+                        onRefresh = { scheduleRequest++ },
+                    )
                     HomeStationCard(
                         state = homeState,
                         departures = homeDepartures,
+                        scheduleIsToday = repo.source.kind == ScheduleSource.Kind.TODAY,
                         now = now,
                         onUseLocation = {
                             if (locationSource.hasPermission()) {

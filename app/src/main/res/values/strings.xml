@@ -11,7 +11,6 @@
     <string name="now">agora</string>
     <string name="in_minutes">em %1$d min</string>
     <string name="in_hours">em %1$dh%2$02d</string>
-    <string name="same_schedule_warning">O Metrofor publica o mesmo quadro para todos os dias da semana. Em feriados, confira o horário oficial.</string>
     <plurals name="stations_count">
         <item quantity="one">%1$d estação</item>
         <item quantity="other">%1$d estações</item>
@@ -54,4 +53,11 @@
     <string name="news_refresh">Atualizar notícias</string>
     <string name="news_show_more">Ver mais</string>
     <string name="news_show_less">Ver menos</string>
+
+    <string name="schedule_syncing">Baixando os horários de hoje do Metrofor…</string>
+    <string name="schedule_today">Horários de hoje, baixados do Metrofor às %1$s.</string>
+    <string name="schedule_same_type">Horários baixados em %1$s, num dia do mesmo tipo. Os de hoje podem ser diferentes.</string>
+    <string name="schedule_same_type_failed">Sem conexão com o Metrofor: mostrando os horários de %1$s, num dia do mesmo tipo. Os de hoje podem ser diferentes.</string>
+    <string name="schedule_bundled">Horários de dia útil que vieram com o app. Conecte-se à internet para baixar os de hoje.</string>
+    <string name="schedule_refresh">Baixar os horários de novo</string>
 </resources>

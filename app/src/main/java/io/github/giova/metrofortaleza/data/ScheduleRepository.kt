@@ -3,10 +3,14 @@ package io.github.giova.metrofortaleza.data
 import android.content.Context
 import android.database.Cursor
 
-/** Consultas de leitura sobre o banco de horários embarcado. */
+/** Consultas de leitura sobre o banco de horários em uso (baixado ou embarcado). */
 class ScheduleRepository(context: Context) {
 
-    private val db = MetroforDatabase.open(context)
+    private val opened = MetroforDatabase.open(context)
+    private val db = opened.first
+
+    /** De onde vêm os horários deste repositório. */
+    val source: ScheduleSource = opened.second
 
     fun routes(): List<Route> = db.rawQuery(
         """

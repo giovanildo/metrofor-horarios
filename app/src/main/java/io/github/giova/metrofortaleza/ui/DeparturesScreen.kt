@@ -46,6 +46,7 @@ import io.github.giova.metrofortaleza.data.nowDayOfWeek
 import io.github.giova.metrofortaleza.data.Departure
 import io.github.giova.metrofortaleza.data.Direction
 import io.github.giova.metrofortaleza.data.Route
+import io.github.giova.metrofortaleza.data.ScheduleSource
 import io.github.giova.metrofortaleza.data.Stop
 import io.github.giova.metrofortaleza.data.formatTime
 import io.github.giova.metrofortaleza.data.isSundayToday
@@ -64,7 +65,7 @@ fun DeparturesScreen(
     stop: Stop,
     directions: List<Direction>,
     departuresFor: (Direction) -> List<Int>,
-    showSameScheduleWarning: Boolean,
+    schedule: ScheduleSource,
     bike: NearbyBike?,
     isPinned: Boolean,
     onTogglePin: () -> Unit,
@@ -143,7 +144,8 @@ fun DeparturesScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                if (sunday) {
+                // Com a grade de hoje baixada, ela já diz se há operação especial.
+                if (sunday && schedule.kind != ScheduleSource.Kind.TODAY) {
                     item { SundayNotice() }
                 }
 
@@ -208,15 +210,13 @@ fun DeparturesScreen(
                 }
                 item { AllDepartures(all) }
 
-                if (showSameScheduleWarning) {
-                    item {
-                        Text(
-                            text = stringResource(R.string.same_schedule_warning),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = 8.dp),
-                        )
-                    }
+                item {
+                    Text(
+                        text = scheduleStatusText(schedule, syncing = false, failed = false),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
                 }
             }
         }

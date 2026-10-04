@@ -1,10 +1,10 @@
 # Metrô Fortaleza — horários
 
 App Android **não oficial** com os horários das linhas do Metrofor (Fortaleza,
-Sobral e Cariri). O quadro de horários vai embarcado no APK, então as consultas
-funcionam inteiramente offline. A única coisa que usa a rede são as
-**manchetes de notícias** (veja abaixo), e sem internet o app mostra a última
-lista baixada.
+Sobral e Cariri). Uma vez por dia, ao abrir, o app **baixa os horários do dia
+direto do Metrofor** (veja [Horários do dia](#horários-do-dia)) e também as
+**manchetes de notícias**. Sem internet, tudo continua funcionando com a última
+cópia guardada no aparelho e, em último caso, com a grade que vem no APK.
 
 A tela inicial destaca uma estação com a próxima partida de cada sentido. Ela
 pode vir de duas fontes:
@@ -52,6 +52,43 @@ dias. A lista fica guardada no aparelho e é baixada de novo ao abrir o app se
 tiver mais de 3 horas, ou pelo botão de atualizar. Não é uma API oficial: se
 ela falhar, a lista antiga continua na tela.
 
+## Horários do dia
+
+O GTFS do Metrofor é gerado a cada requisição e, pelo que observamos, traz a
+**grade do dia em que é baixado**, embora o `calendar.txt` diga que vale todos
+os dias:
+
+| Baixado em | Linha Sul |
+|---|---|
+| quinta, 24/09 | 5h30 – 23h18, 53 viagens por sentido (dia útil) |
+| sábado, 03/10 | 5h30 – 17h08, 37 viagens por sentido |
+| domingo, 04/10 (eleição) | 7h30 – 18h10 (operação especial) |
+
+Por isso o app baixa o feed **no próprio celular** uma vez por dia
+(`data/ScheduleStore.kt`), monta o banco com o mesmo resultado de
+`tools/build_db.py` (`data/GtfsImporter.kt`, uma tradução direta do script, que
+gera tabelas idênticas para o mesmo feed) e guarda a última grade de cada tipo
+de dia: dia útil, sábado e domingo. A grade de hoje vale até a meia-noite; sem
+internet, o app usa a última do mesmo tipo e avisa em vermelho de que dia ela
+é. O banco do APK fica como último recurso. Uma linha no topo da tela inicial
+diz de onde vêm os horários e tem um botão para baixar de novo.
+
+Detalhes que valem saber:
+
+- **Certificado vencido.** O certificado HTTPS de `*.metrofor.ce.gov.br`
+  costuma estar expirado. O app aceita qualquer certificado **só nessa
+  conexão**: são dados públicos de horário, e o pior que um intermediário
+  faria é mostrar uma grade errada.
+- **Nada de trava por "grade menor".** Como a grade muda de verdade de um dia
+  para outro, o app só recusa um feed que não dá para ler ou que não tem linhas
+  nem estações. Zero viagens é aceito: num domingo comum pode ser exatamente a
+  verdade.
+- **Domingo.** Se a grade de domingo foi baixada hoje, ela já diz se há
+  operação especial e o aviso de domingo some. Sem ela, o aviso aparece.
+- **Bicicletar** não vem do GTFS: as estações são copiadas do banco do APK.
+- **Gere o banco do APK num dia útil.** Rodar `tools/build_db.py` num sábado ou
+  domingo embarcaria a grade daquele dia como reserva para todos os dias.
+
 ## Como os dados chegam aqui
 
 O Metrofor publica um feed [GTFS](https://gtfs.org) em
@@ -68,7 +105,8 @@ python3 tools/build_db.py feed.zip   # ou usa um zip local
 ```
 
 A saída é `app/src/main/assets/metrofor.db` (~200 KB), com 7 linhas,
-64 estações e 3.877 partidas.
+64 estações e 3.877 partidas. É a reserva que vai no APK; no dia a dia o app
+usa a grade que ele mesmo baixa.
 
 Junto do banco o script grava `metrofor.db.version`, com o carimbo de geração.
 O app lê esse arquivo minúsculo direto dos assets a cada arranque e só reinstala
@@ -101,7 +139,9 @@ bash tools/install-weekly-check.sh --remove   # desfaz
 
 Roda segunda-feira às 10h e, com `Persistent=true`, recupera a execução se a
 máquina estiver desligada na hora. Quando algo mudar, aparece uma notificação —
-aí é rodar `tools/build_db.py` e recompilar.
+aí é rodar `tools/build_db.py` e recompilar. Com o download diário no celular,
+isso só serve para renovar a reserva do APK; como o conteúdo muda conforme o
+dia da semana, espere avisos quando a checagem não cair num dia útil.
 
 ## Limitações conhecidas dos dados
 

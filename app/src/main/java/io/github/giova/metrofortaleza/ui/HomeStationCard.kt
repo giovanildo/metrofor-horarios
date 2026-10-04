@@ -45,6 +45,7 @@ import kotlin.math.roundToInt
 fun HomeStationCard(
     state: HomeStation,
     departures: List<HomeDeparture>,
+    scheduleIsToday: Boolean,
     now: Int,
     onUseLocation: () -> Unit,
     onOpenStation: (Station) -> Unit,
@@ -80,6 +81,7 @@ fun HomeStationCard(
                 subtitle = stringResource(R.string.home_distance, formatDistance(state.distanceMeters)),
                 icon = Icons.Filled.MyLocation,
                 departures = departures,
+                scheduleIsToday = scheduleIsToday,
                 now = now,
                 onRefresh = onUseLocation,
                 onClick = { onOpenStation(state.station) },
@@ -90,6 +92,7 @@ fun HomeStationCard(
                 subtitle = stringResource(R.string.home_your_station),
                 icon = Icons.Filled.Star,
                 departures = departures,
+                scheduleIsToday = scheduleIsToday,
                 now = now,
                 onRefresh = null,
                 onClick = { onOpenStation(state.station) },
@@ -127,6 +130,7 @@ private fun StationSummary(
     subtitle: String,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     departures: List<HomeDeparture>,
+    scheduleIsToday: Boolean,
     now: Int,
     onRefresh: (() -> Unit)?,
     onClick: () -> Unit,
@@ -176,7 +180,8 @@ private fun StationSummary(
             modifier = Modifier.padding(top = 12.dp),
         ) {
             val sunday = remember(now) { isSundayToday() }
-            if (sunday) {
+            // Com a grade de hoje baixada, ela já diz se há operação especial.
+            if (sunday && !scheduleIsToday) {
                 SundayNotice(modifier = Modifier.padding(bottom = 6.dp))
             }
             departures.forEach { item ->
