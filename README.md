@@ -31,6 +31,15 @@ também offline):
 - **Na tela de partidas** de cada estação, medida a partir dela e escondida
   acima de 600 m, porque a essa distância deixa de ajudar.
 
+Nas linhas Sul, Oeste e Nordeste, o app diz também **se dá para embarcar com
+bicicleta no trem agora**, na tela de partidas e no cartão da tela inicial. As
+janelas vêm do regulamento
+[*Bike é bem-vinda no metrô*](https://www.ce.gov.br/metrofor/wp-content/uploads/sites/75/2023/03/Regula_Bikes_2023.pdf)
+(Metrofor, 2023): segunda a sexta das 9h às 15h e a partir das 20h; sábado a
+partir das 15h. Domingo não aparece no regulamento, e os VLTs também não, por
+isso ficam de fora. As regras estão fixas em `data/BikeBoarding.kt` — se o
+Metrofor mudar o regulamento, é lá que se mexe.
+
 ## Como os dados chegam aqui
 
 O Metrofor publica um feed [GTFS](https://gtfs.org) em

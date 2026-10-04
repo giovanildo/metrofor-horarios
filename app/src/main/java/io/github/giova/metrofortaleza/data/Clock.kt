@@ -11,6 +11,10 @@ fun nowMinutes(): Int {
     return calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
 }
 
+/** Dia da semana em Fortaleza, como as constantes de [Calendar] (`Calendar.SUNDAY`…). */
+fun nowDayOfWeek(): Int =
+    Calendar.getInstance(TimeZone.getTimeZone("America/Fortaleza")).get(Calendar.DAY_OF_WEEK)
+
 /** Formata minutos desde a meia-noite como `HH:mm`. */
 fun formatTime(minutes: Int): String {
     val normalized = ((minutes % MINUTES_PER_DAY) + MINUTES_PER_DAY) % MINUTES_PER_DAY

@@ -23,6 +23,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,6 +31,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.github.giova.metrofortaleza.R
+import io.github.giova.metrofortaleza.data.BIKE_BOARDING_ROUTE_IDS
+import io.github.giova.metrofortaleza.data.bikeBoarding
+import io.github.giova.metrofortaleza.data.nowDayOfWeek
 import io.github.giova.metrofortaleza.data.Station
 import io.github.giova.metrofortaleza.data.formatTime
 import io.github.giova.metrofortaleza.data.minutesUntil
@@ -188,6 +192,12 @@ private fun StationSummary(
                         fontWeight = FontWeight.Medium,
                     )
                 }
+            }
+            if (station.routeId in BIKE_BOARDING_ROUTE_IDS) {
+                BikeBoardingNotice(
+                    rule = remember(now) { bikeBoarding(nowDayOfWeek(), now) },
+                    modifier = Modifier.padding(top = 6.dp),
+                )
             }
         }
     }

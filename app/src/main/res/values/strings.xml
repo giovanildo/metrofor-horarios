@@ -39,4 +39,9 @@
     <string name="home_bike_from_you">Bicicletar mais próximo de você</string>
     <string name="home_bike_from_station">Bicicletar mais próximo da estação</string>
     <string name="bike_no_realtime">Capacidade da estação, não disponibilidade agora.</string>
+
+    <string name="bike_boarding_until">Pode embarcar com bike no trem agora, até as %1$s</string>
+    <string name="bike_boarding_until_close">Pode embarcar com bike no trem agora, até o fim da operação</string>
+    <string name="bike_boarding_from">Bike no trem só a partir das %1$s</string>
+    <string name="bike_boarding_not_today">Hoje não há horário para embarcar com bike no trem</string>
 </resources>

@@ -40,6 +40,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.github.giova.metrofortaleza.R
+import io.github.giova.metrofortaleza.data.BIKE_BOARDING_ROUTE_IDS
+import io.github.giova.metrofortaleza.data.bikeBoarding
+import io.github.giova.metrofortaleza.data.nowDayOfWeek
 import io.github.giova.metrofortaleza.data.Departure
 import io.github.giova.metrofortaleza.data.Direction
 import io.github.giova.metrofortaleza.data.Route
@@ -80,6 +83,9 @@ fun DeparturesScreen(
     val direction = directions.getOrNull(selectedTab) ?: directions.firstOrNull()
     val all = remember(direction) { direction?.let(departuresFor).orEmpty() }
     val next = remember(all, now) { nextDepartures(all, now, NEXT_COUNT) }
+    val bikeRule = remember(route.id, now) {
+        if (route.id in BIKE_BOARDING_ROUTE_IDS) bikeBoarding(nowDayOfWeek(), now) else null
+    }
 
     Scaffold(
         topBar = {
@@ -159,6 +165,10 @@ fun DeparturesScreen(
                             }
                         }
                     }
+                }
+
+                if (bikeRule != null) {
+                    item { BikeBoardingNotice(bikeRule) }
                 }
 
                 if (bike != null) {
