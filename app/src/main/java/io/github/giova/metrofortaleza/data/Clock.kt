@@ -15,6 +15,13 @@ fun nowMinutes(): Int {
 fun nowDayOfWeek(): Int =
     Calendar.getInstance(TimeZone.getTimeZone("America/Fortaleza")).get(Calendar.DAY_OF_WEEK)
 
+/**
+ * Domingo em Fortaleza. Metrô e VLTs normalmente não circulam aos domingos,
+ * só em operação especial (eleição, ENEM, eventos) — mas o GTFS publica o
+ * mesmo quadro para todos os dias, então o app precisa avisar por conta própria.
+ */
+fun isSundayToday(): Boolean = nowDayOfWeek() == Calendar.SUNDAY
+
 /** Formata minutos desde a meia-noite como `HH:mm`. */
 fun formatTime(minutes: Int): String {
     val normalized = ((minutes % MINUTES_PER_DAY) + MINUTES_PER_DAY) % MINUTES_PER_DAY

@@ -36,6 +36,7 @@ import io.github.giova.metrofortaleza.data.bikeBoarding
 import io.github.giova.metrofortaleza.data.nowDayOfWeek
 import io.github.giova.metrofortaleza.data.Station
 import io.github.giova.metrofortaleza.data.formatTime
+import io.github.giova.metrofortaleza.data.isSundayToday
 import io.github.giova.metrofortaleza.data.minutesUntil
 import io.github.giova.metrofortaleza.ui.theme.routeColor
 import kotlin.math.roundToInt
@@ -174,6 +175,10 @@ private fun StationSummary(
             verticalArrangement = Arrangement.spacedBy(6.dp),
             modifier = Modifier.padding(top = 12.dp),
         ) {
+            val sunday = remember(now) { isSundayToday() }
+            if (sunday) {
+                SundayNotice(modifier = Modifier.padding(bottom = 6.dp))
+            }
             departures.forEach { item ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -193,7 +198,8 @@ private fun StationSummary(
                     )
                 }
             }
-            if (station.routeId in BIKE_BOARDING_ROUTE_IDS) {
+            // No domingo especial a regra de bike é desconhecida: melhor calar.
+            if (!sunday && station.routeId in BIKE_BOARDING_ROUTE_IDS) {
                 BikeBoardingNotice(
                     rule = remember(now) { bikeBoarding(nowDayOfWeek(), now) },
                     modifier = Modifier.padding(top = 6.dp),

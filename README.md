@@ -36,8 +36,9 @@ bicicleta no trem agora**, na tela de partidas e no cartão da tela inicial. As
 janelas vêm do regulamento
 [*Bike é bem-vinda no metrô*](https://www.ce.gov.br/metrofor/wp-content/uploads/sites/75/2023/03/Regula_Bikes_2023.pdf)
 (Metrofor, 2023): segunda a sexta das 9h às 15h e a partir das 20h; sábado a
-partir das 15h. Domingo não aparece no regulamento, e os VLTs também não, por
-isso ficam de fora. As regras estão fixas em `data/BikeBoarding.kt` — se o
+partir das 15h. Os VLTs não aparecem no regulamento, por isso ficam de fora; no
+domingo o aviso de bike some, porque nesse dia só há operação especial e a regra
+dela não é conhecida. As regras estão fixas em `data/BikeBoarding.kt` — se o
 Metrofor mudar o regulamento, é lá que se mexe.
 
 ## Como os dados chegam aqui
@@ -99,6 +100,11 @@ Estas vêm do feed oficial, não do app:
    feed não distingue dia útil, sábado e domingo, então o app mostra o mesmo
    quadro todo dia e exibe um aviso na tela de horários. Se você conferir os
    quadros publicados e eles divergirem, é preciso modelar os dias à mão.
+   **Domingo é o caso mais grave:** metrô e VLTs normalmente não circulam, a
+   não ser em operação especial (eleição, ENEM, eventos), mas o feed diz que
+   sim. Por isso, aos domingos, o app põe um aviso em destaque na tela inicial
+   e na de partidas. As partidas continuam visíveis como referência para os
+   dias de operação especial.
 2. **O `calendar_dates.txt` está desatualizado**: lista feriados de 2025,
    enquanto o feed diz valer até 2027. O app ignora esse arquivo.
 3. **Não há `transfers.txt`.** As três baldeações reais foram derivadas por

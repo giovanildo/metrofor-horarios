@@ -44,4 +44,6 @@
     <string name="bike_boarding_until_close">Pode embarcar com bike no trem agora, até o fim da operação</string>
     <string name="bike_boarding_from">Bike no trem só a partir das %1$s</string>
     <string name="bike_boarding_not_today">Hoje não há horário para embarcar com bike no trem</string>
+
+    <string name="sunday_warning">Aos domingos o metrô e os VLTs normalmente não circulam. Em dias de operação especial (eleição, ENEM, eventos), os horários podem ser diferentes destes.</string>
 </resources>

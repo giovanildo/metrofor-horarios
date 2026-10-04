@@ -48,6 +48,7 @@ import io.github.giova.metrofortaleza.data.Direction
 import io.github.giova.metrofortaleza.data.Route
 import io.github.giova.metrofortaleza.data.Stop
 import io.github.giova.metrofortaleza.data.formatTime
+import io.github.giova.metrofortaleza.data.isSundayToday
 import io.github.giova.metrofortaleza.data.minutesUntil
 import io.github.giova.metrofortaleza.data.nextDepartures
 import io.github.giova.metrofortaleza.data.nowMinutes
@@ -83,8 +84,10 @@ fun DeparturesScreen(
     val direction = directions.getOrNull(selectedTab) ?: directions.firstOrNull()
     val all = remember(direction) { direction?.let(departuresFor).orEmpty() }
     val next = remember(all, now) { nextDepartures(all, now, NEXT_COUNT) }
+    val sunday = remember(now) { isSundayToday() }
+    // No domingo especial a regra de bike é desconhecida: melhor calar.
     val bikeRule = remember(route.id, now) {
-        if (route.id in BIKE_BOARDING_ROUTE_IDS) bikeBoarding(nowDayOfWeek(), now) else null
+        if (!sunday && route.id in BIKE_BOARDING_ROUTE_IDS) bikeBoarding(nowDayOfWeek(), now) else null
     }
 
     Scaffold(
@@ -140,6 +143,10 @@ fun DeparturesScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
+                if (sunday) {
+                    item { SundayNotice() }
+                }
+
                 item {
                     Text(
                         text = stringResource(R.string.next_departures),
