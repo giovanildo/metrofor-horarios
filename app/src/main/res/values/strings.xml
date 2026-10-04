@@ -36,5 +36,7 @@
         <item quantity="one">%1$d vaga</item>
         <item quantity="other">%1$d vagas</item>
     </plurals>
+    <string name="home_bike_from_you">Bicicletar mais próximo de você</string>
+    <string name="home_bike_from_station">Bicicletar mais próximo da estação</string>
     <string name="bike_no_realtime">Capacidade da estação, não disponibilidade agora.</string>
 </resources>

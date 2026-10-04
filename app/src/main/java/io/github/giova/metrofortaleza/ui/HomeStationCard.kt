@@ -40,7 +40,6 @@ import kotlin.math.roundToInt
 fun HomeStationCard(
     state: HomeStation,
     departures: List<HomeDeparture>,
-    bike: NearbyBike?,
     now: Int,
     onUseLocation: () -> Unit,
     onOpenStation: (Station) -> Unit,
@@ -76,7 +75,6 @@ fun HomeStationCard(
                 subtitle = stringResource(R.string.home_distance, formatDistance(state.distanceMeters)),
                 icon = Icons.Filled.MyLocation,
                 departures = departures,
-                bike = bike,
                 now = now,
                 onRefresh = onUseLocation,
                 onClick = { onOpenStation(state.station) },
@@ -87,7 +85,6 @@ fun HomeStationCard(
                 subtitle = stringResource(R.string.home_your_station),
                 icon = Icons.Filled.Star,
                 departures = departures,
-                bike = bike,
                 now = now,
                 onRefresh = null,
                 onClick = { onOpenStation(state.station) },
@@ -125,7 +122,6 @@ private fun StationSummary(
     subtitle: String,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     departures: List<HomeDeparture>,
-    bike: NearbyBike?,
     now: Int,
     onRefresh: (() -> Unit)?,
     onClick: () -> Unit,
@@ -192,13 +188,6 @@ private fun StationSummary(
                         fontWeight = FontWeight.Medium,
                     )
                 }
-            }
-            if (bike != null) {
-                BikeStationRow(
-                    bike = bike,
-                    compact = true,
-                    modifier = Modifier.padding(top = 10.dp),
-                )
             }
         }
     }

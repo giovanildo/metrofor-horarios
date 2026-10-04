@@ -22,8 +22,13 @@ sealed interface HomeStation {
 
     data object Locating : HomeStation
 
-    /** Achada por GPS. */
-    data class Nearby(val station: Station, val distanceMeters: Double) : HomeStation
+    /** Achada por GPS; guarda também onde a pessoa estava. */
+    data class Nearby(
+        val station: Station,
+        val distanceMeters: Double,
+        val userLat: Double,
+        val userLon: Double,
+    ) : HomeStation
 
     /** Escolhida à mão pela pessoa. */
     data class Pinned(val station: Station) : HomeStation

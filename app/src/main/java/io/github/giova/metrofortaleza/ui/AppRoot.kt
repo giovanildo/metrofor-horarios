@@ -3,7 +3,9 @@ package io.github.giova.metrofortaleza.ui
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
@@ -18,6 +20,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import io.github.giova.metrofortaleza.data.BIKE_NEAR_YOU_MAX_METERS
 import io.github.giova.metrofortaleza.data.LocationSource
 import io.github.giova.metrofortaleza.data.PinnedStation
 import io.github.giova.metrofortaleza.data.ScheduleRepository
@@ -87,7 +91,9 @@ fun AppRoot() {
             repo.stations().nearestTo(position.latitude, position.longitude)
         }
         homeState = nearest
-            ?.let { (station, distance) -> HomeStation.Nearby(station, distance) }
+            ?.let { (station, distance) ->
+                HomeStation.Nearby(station, distance, position.latitude, position.longitude)
+            }
             ?: HomeStation.Unavailable(HomeStation.Reason.NO_FIX)
     }
 
@@ -137,10 +143,20 @@ fun AppRoot() {
         }.orEmpty()
     }
 
+    // Com GPS, o Bicicletar mais perto da pessoa; com estação fixada, o da estação.
     val homeBike = remember(homeState, bikeStations) {
-        homeState.station?.let { station ->
-            bikeStations.nearestBikeTo(station.lat, station.lon)
+        when (val state = homeState) {
+            is HomeStation.Nearby -> bikeStations
+                .nearestBikeTo(state.userLat, state.userLon, BIKE_NEAR_YOU_MAX_METERS)
                 ?.let { (bike, distance) -> NearbyBike(bike, distance) }
+                ?.let { HomeBike(it, fromYou = true) }
+
+            is HomeStation.Pinned -> bikeStations
+                .nearestBikeTo(state.station.lat, state.station.lon)
+                ?.let { (bike, distance) -> NearbyBike(bike, distance) }
+                ?.let { HomeBike(it, fromYou = false) }
+
+            else -> null
         }
     }
 
@@ -196,20 +212,22 @@ fun AppRoot() {
             stationCount = { repo.stationCount(it.id) },
             onRouteClick = { routeId = it.id },
             header = {
-                HomeStationCard(
-                    state = homeState,
-                    departures = homeDepartures,
-                    bike = homeBike,
-                    now = now,
-                    onUseLocation = {
-                        if (locationSource.hasPermission()) {
-                            scope.launch { locate() }
-                        } else {
-                            permissionLauncher.launch(LocationSource.PERMISSIONS)
-                        }
-                    },
-                    onOpenStation = ::openStation,
-                )
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    HomeStationCard(
+                        state = homeState,
+                        departures = homeDepartures,
+                        now = now,
+                        onUseLocation = {
+                            if (locationSource.hasPermission()) {
+                                scope.launch { locate() }
+                            } else {
+                                permissionLauncher.launch(LocationSource.PERMISSIONS)
+                            }
+                        },
+                        onOpenStation = ::openStation,
+                    )
+                    homeBike?.let { HomeBikeCard(it) }
+                }
             },
         )
     }

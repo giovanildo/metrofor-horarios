@@ -20,10 +20,16 @@ convite e o resto funciona igual.
 
 A localização usa o `LocationManager` do próprio Android, sem Play Services.
 
-Junto de cada estação, o app mostra a **estação do Bicicletar mais próxima**
-com nome, número, distância e capacidade de vagas — escondida acima de 600 m,
-porque a essa distância deixa de ajudar. São 253 estações no banco, também
-offline.
+O app mostra a **estação do Bicicletar mais próxima** com nome, número,
+distância e capacidade de vagas, em dois lugares (são 253 estações no banco,
+também offline):
+
+- **Na tela inicial**, num cartão próprio logo abaixo do da estação. Com GPS, a
+  distância é medida a partir de **você**, até 3 km — acima disso (fora de
+  Fortaleza, por exemplo) o cartão some. Com estação fixada, é medida a partir
+  da estação, até 600 m.
+- **Na tela de partidas** de cada estação, medida a partir dela e escondida
+  acima de 600 m, porque a essa distância deixa de ajudar.
 
 ## Como os dados chegam aqui
 

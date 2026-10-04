@@ -33,6 +33,13 @@ fun List<Station>.nearestTo(lat: Double, lon: Double): Pair<Station, Double>? =
  */
 const val BIKE_MAX_METERS = 600.0
 
+/**
+ * Raio para o Bicicletar mais perto de *você* na tela inicial. É maior que
+ * [BIKE_MAX_METERS] porque ali a pessoa ainda não está numa estação de metrô,
+ * mas acima disso (fora de Fortaleza, por exemplo) o card some.
+ */
+const val BIKE_NEAR_YOU_MAX_METERS = 3_000.0
+
 /** A estação de bicicleta mais próxima de ([lat], [lon]), dentro de [maxMeters]. */
 fun List<BikeStation>.nearestBikeTo(
     lat: Double,
