@@ -31,22 +31,21 @@ fun formatTime(minutes: Int): String {
 /**
  * As próximas [count] partidas a partir de [now].
  *
- * Se o serviço do dia já terminou, volta ao começo da lista e marca as partidas
- * como sendo de amanhã — o feed do Metrofor usa o mesmo quadro todos os dias,
- * então a primeira viagem de amanhã é a mesma de hoje.
+ * Se o serviço do dia acabar antes de completar [count], continua pelas
+ * partidas de amanhã ([tomorrow]), marcadas como tal. Com [tomorrow] `null`
+ * (não sabemos a grade de amanhã), devolve só as de hoje.
  */
-fun nextDepartures(all: List<Int>, now: Int, count: Int): List<Departure> {
-    if (all.isEmpty()) return emptyList()
+fun nextDepartures(all: List<Int>, now: Int, count: Int, tomorrow: List<Int>?): List<Departure> {
     val today = all.asSequence()
         .filter { it >= now }
         .take(count)
         .map { Departure(it, tomorrow = false) }
         .toList()
-    if (today.size >= count) return today
-    val tomorrow = all.asSequence()
+    if (today.size >= count || tomorrow == null) return today
+    val next = tomorrow.asSequence()
         .take(count - today.size)
         .map { Departure(it, tomorrow = true) }
-    return today + tomorrow
+    return today + next
 }
 
 /** Quantos minutos faltam para [departure], considerando a virada do dia. */

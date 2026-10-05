@@ -12,6 +12,9 @@ class ScheduleRepository(context: Context) {
     /** De onde vêm os horários deste repositório. */
     val source: ScheduleSource = opened.second
 
+    /** A grade provável de amanhã, ou `null` se não há como saber. */
+    private val tomorrowDb = MetroforDatabase.openTomorrow(context)
+
     fun routes(): List<Route> = db.rawQuery(
         """
         SELECT route_id, name, description, color
@@ -60,7 +63,23 @@ class ScheduleRepository(context: Context) {
     ).map { Stop(it.getString(0), it.getString(1), it.getInt(2)) }
 
     /** Todas as partidas do dia, em minutos desde a meia-noite, já ordenadas. */
-    fun departures(stopId: String, routeId: String, directionId: Int): List<Int> = db.rawQuery(
+    fun departures(stopId: String, routeId: String, directionId: Int): List<Int> =
+        departuresIn(db, stopId, routeId, directionId)
+
+    /**
+     * As partidas de amanhã, pela grade do tipo de dia de amanhã — e não a de
+     * hoje repetida, que num dia especial (eleição) daria horário errado.
+     * `null` quando não há grade para saber.
+     */
+    fun departuresTomorrow(stopId: String, routeId: String, directionId: Int): List<Int>? =
+        tomorrowDb?.let { departuresIn(it, stopId, routeId, directionId) }
+
+    private fun departuresIn(
+        db: android.database.sqlite.SQLiteDatabase,
+        stopId: String,
+        routeId: String,
+        directionId: Int,
+    ): List<Int> = db.rawQuery(
         """
         SELECT minutes
         FROM departure

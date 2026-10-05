@@ -34,6 +34,20 @@ internal object MetroforDatabase {
         return openFile(file) to source
     }
 
+    /**
+     * O banco com a grade mais provável de amanhã: a última baixada do tipo de
+     * dia de amanhã, ou a do APK se amanhã for dia útil (é a grade dela).
+     * `null` quando não há como saber — sábado ou domingo nunca baixados.
+     */
+    fun openTomorrow(context: Context): SQLiteDatabase? {
+        val app = context.applicationContext
+        val type = ScheduleStore.tomorrowType()
+        val file = ScheduleStore.stored(app, type)
+            ?: bundledFile(app).takeIf { type == DayType.WEEKDAY }
+            ?: return null
+        return openFile(file)
+    }
+
     /** O banco do APK já copiado para o disco; serve também de fonte do Bicicletar. */
     fun bundledFile(context: Context): File = synchronized(this) {
         val app = context.applicationContext

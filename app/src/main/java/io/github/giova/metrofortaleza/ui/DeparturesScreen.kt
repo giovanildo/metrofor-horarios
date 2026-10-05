@@ -65,6 +65,7 @@ fun DeparturesScreen(
     stop: Stop,
     directions: List<Direction>,
     departuresFor: (Direction) -> List<Int>,
+    tomorrowFor: (Direction) -> List<Int>?,
     schedule: ScheduleSource,
     bike: NearbyBike?,
     isPinned: Boolean,
@@ -84,7 +85,8 @@ fun DeparturesScreen(
 
     val direction = directions.getOrNull(selectedTab) ?: directions.firstOrNull()
     val all = remember(direction) { direction?.let(departuresFor).orEmpty() }
-    val next = remember(all, now) { nextDepartures(all, now, NEXT_COUNT) }
+    val tomorrow = remember(direction) { direction?.let(tomorrowFor) }
+    val next = remember(all, tomorrow, now) { nextDepartures(all, now, NEXT_COUNT, tomorrow) }
     val sunday = remember(now) { isSundayToday() }
     // No domingo especial a regra de bike é desconhecida: melhor calar.
     val bikeRule = remember(route.id, now) {

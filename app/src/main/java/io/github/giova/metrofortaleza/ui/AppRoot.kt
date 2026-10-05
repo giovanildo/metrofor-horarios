@@ -155,7 +155,7 @@ fun AppRoot() {
 
     LaunchedEffect(repo) { refreshHome() }
 
-    val homeDepartures = remember(homeState, now) {
+    val homeDepartures = remember(repo, homeState, now) {
         homeState.station?.let { station ->
             repo.directions(station.routeId).map { direction ->
                 HomeDeparture(
@@ -164,6 +164,7 @@ fun AppRoot() {
                         repo.departures(station.stopId, station.routeId, direction.id),
                         now,
                         count = 1,
+                        tomorrow = repo.departuresTomorrow(station.stopId, station.routeId, direction.id),
                     ).firstOrNull(),
                 )
             }
@@ -235,6 +236,9 @@ fun AppRoot() {
                 directions = directions,
                 departuresFor = { direction ->
                     repo.departures(stop.id, route.id, direction.id)
+                },
+                tomorrowFor = { direction ->
+                    repo.departuresTomorrow(stop.id, route.id, direction.id)
                 },
                 schedule = repo.source,
                 bike = bike,

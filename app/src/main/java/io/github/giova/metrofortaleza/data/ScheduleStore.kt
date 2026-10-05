@@ -61,11 +61,19 @@ object ScheduleStore {
         .apply { timeZone = zone }
         .format(Date())
 
-    fun todayType(): DayType = when (Calendar.getInstance(zone).get(Calendar.DAY_OF_WEEK)) {
+    fun todayType(): DayType = typeOf(Calendar.getInstance(zone))
+
+    fun tomorrowType(): DayType = typeOf(Calendar.getInstance(zone).apply { add(Calendar.DAY_OF_MONTH, 1) })
+
+    private fun typeOf(calendar: Calendar): DayType = when (calendar.get(Calendar.DAY_OF_WEEK)) {
         Calendar.SATURDAY -> DayType.SATURDAY
         Calendar.SUNDAY -> DayType.SUNDAY
         else -> DayType.WEEKDAY
     }
+
+    /** A última grade baixada de [type], se houver. */
+    fun stored(context: Context, type: DayType): File? =
+        file(context, type).takeIf { it.exists() && prefs(context).getString(keyDate(type), null) != null }
 
     /** O arquivo da grade a usar agora e de onde ele veio. `null` = usar a do APK. */
     fun current(context: Context): Pair<File, ScheduleSource>? {
