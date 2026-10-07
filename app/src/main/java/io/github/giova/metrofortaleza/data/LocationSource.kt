@@ -10,6 +10,9 @@ import android.location.LocationManager
 import android.os.Bundle
 import android.os.Looper
 import androidx.core.content.ContextCompat
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.coroutines.resume
@@ -78,11 +81,43 @@ class LocationSource(private val context: Context) {
         }
     }
 
+    /**
+     * Posições contínuas enquanto o Flow for coletado, de GPS e rede ao mesmo
+     * tempo — dentro do trem o GPS some e a rede ainda ajuda. Sem permissão ou
+     * provedor, o Flow simplesmente não emite.
+     */
+    @SuppressLint("MissingPermission") // hasPermission() barra o caminho antes
+    fun updates(intervalMillis: Long, minMeters: Float): Flow<Location> = callbackFlow {
+        val manager = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
+        if (!hasPermission() || manager == null) {
+            awaitClose()
+            return@callbackFlow
+        }
+        val listener = object : LocationListener {
+            override fun onLocationChanged(location: Location) {
+                trySend(location)
+            }
+
+            @Deprecated("Exigido pela interface em APIs anteriores a 30")
+            override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) = Unit
+            override fun onProviderEnabled(provider: String) = Unit
+            override fun onProviderDisabled(provider: String) = Unit
+        }
+        val providers = runCatching { manager.getProviders(true) }.getOrNull().orEmpty()
+            .filter { it == LocationManager.GPS_PROVIDER || it == LocationManager.NETWORK_PROVIDER }
+        providers.forEach { provider ->
+            runCatching {
+                manager.requestLocationUpdates(provider, intervalMillis, minMeters, listener, Looper.getMainLooper())
+            }
+        }
+        awaitClose { manager.removeUpdates(listener) }
+    }
+
     companion object {
         val PERMISSIONS = arrayOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION,
         )
-        private const val MAX_AGE_MILLIS = 5 * 60 * 1000L
+        private const val MAX_AGE_MILLIS = 60 * 1000L
     }
 }

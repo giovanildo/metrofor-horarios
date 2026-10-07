@@ -89,6 +89,27 @@ class ScheduleRepository(context: Context) {
         arrayOf(stopId, routeId, directionId.toString()),
     ).map { it.getInt(0) }
 
+    /**
+     * Viagem que sai de [stopId] na primeira partida a partir de [fromMinutes]:
+     * o id e o horário programado em cada estação. `null` se não há mais
+     * viagem hoje.
+     */
+    fun nextTrip(stopId: String, routeId: String, directionId: Int, fromMinutes: Int): Pair<String, Map<String, Int>>? {
+        val tripId = db.rawQuery(
+            """
+            SELECT trip_id FROM departure
+            WHERE stop_id = ? AND route_id = ? AND direction_id = ? AND minutes >= ?
+            ORDER BY minutes LIMIT 1
+            """.trimIndent(),
+            arrayOf(stopId, routeId, directionId.toString(), fromMinutes.toString()),
+        ).map { it.getString(0) }.firstOrNull() ?: return null
+        val times = db.rawQuery(
+            "SELECT stop_id, minutes FROM departure WHERE trip_id = ? AND route_id = ?",
+            arrayOf(tripId, routeId),
+        ).map { it.getString(0) to it.getInt(1) }.toMap()
+        return tripId to times
+    }
+
     /** Todas as combinações estação/linha, para a busca da mais próxima. */
     fun stations(): List<Station> = db.rawQuery(
         """

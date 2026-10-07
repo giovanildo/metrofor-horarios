@@ -1,5 +1,21 @@
 package io.github.giova.metrofortaleza.ui
 
+import android.Manifest
+import android.os.Build
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import io.github.giova.metrofortaleza.R
+import io.github.giova.metrofortaleza.data.Direction
+import io.github.giova.metrofortaleza.data.Stop
+import io.github.giova.metrofortaleza.data.TripPlan
+import io.github.giova.metrofortaleza.data.TripStop
+import io.github.giova.metrofortaleza.trip.TripTracker
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -41,6 +57,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 private const val TICK_MILLIS = 15_000L
+
+/** GPS da tela inicial: a cada 10 s, ou ao andar 30 m. */
+private const val HOME_GPS_INTERVAL_MILLIS = 10_000L
+private const val HOME_GPS_MIN_METERS = 30f
+
+/** Quem inicia a viagem já dentro do trem ainda pega a partida de até 2 min atrás. */
+private const val TRIP_LATE_BOARDING_MINUTES = 2
 
 /** Manchetes mais velhas que isso são baixadas de novo ao abrir o app. */
 private const val NEWS_STALE_MILLIS = 3L * 60 * 60 * 1000
@@ -155,6 +178,91 @@ fun AppRoot() {
 
     LaunchedEffect(repo) { refreshHome() }
 
+    // GPS contínuo enquanto a tela está visível e a estação veio do GPS: ao
+    // descer em outra estação, o destaque acompanha. Estação fixada ganha do
+    // GPS, então aí não seguimos nada.
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var visible by remember { mutableStateOf(true) }
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_START -> visible = true
+                Lifecycle.Event.ON_STOP -> visible = false
+                else -> Unit
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    val followGps = visible && homeState is HomeStation.Nearby
+    LaunchedEffect(followGps, repo) {
+        if (!followGps) return@LaunchedEffect
+        val stations = withContext(Dispatchers.IO) { repo.stations() }
+        locationSource.updates(HOME_GPS_INTERVAL_MILLIS, HOME_GPS_MIN_METERS).collect { position ->
+            stations.nearestTo(position.latitude, position.longitude)?.let { (station, distance) ->
+                homeState = HomeStation.Nearby(station, distance, position.latitude, position.longitude)
+            }
+        }
+    }
+
+    // ------------------------------------------------------------ viagem ----
+    val activeTrip by TripTracker.active.collectAsState()
+    val tripSound by TripTracker.soundEnabled(context).collectAsState()
+    var pendingTrip by remember { mutableStateOf<TripPlan?>(null) }
+    var tripMessage by remember { mutableStateOf<String?>(null) }
+    val tripPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions(),
+    ) { granted ->
+        val plan = pendingTrip
+        pendingTrip = null
+        // Notificação negada não impede a viagem: o card na tela continua valendo.
+        if (plan != null && locationSource.hasPermission()) {
+            TripTracker.start(context, plan)
+            stopId = null
+            routeId = null
+        } else if (plan != null) {
+            tripMessage = context.getString(R.string.trip_needs_location)
+        }
+    }
+
+    fun startTrip(routeId: String, direction: Direction, origin: Stop, destination: Stop) {
+        val route = repo.route(routeId) ?: return
+        val trip = repo.nextTrip(origin.id, routeId, direction.id, nowMinutes() - TRIP_LATE_BOARDING_MINUTES)
+        if (trip == null) {
+            tripMessage = context.getString(R.string.trip_no_trip_today)
+            return
+        }
+        val (_, times) = trip
+        val coords = repo.stations().filter { it.routeId == routeId }.associateBy { it.stopId }
+        val path = repo.stops(routeId, direction.id)
+            .dropWhile { it.id != origin.id }
+            .let { list -> list.take(list.indexOfFirst { it.id == destination.id } + 1) }
+        val stops = path.mapNotNull { stop ->
+            val station = coords[stop.id] ?: return@mapNotNull null
+            val time = times[stop.id] ?: return@mapNotNull null
+            TripStop(stop.id, stop.name, station.lat, station.lon, time)
+        }
+        if (stops.size < 2) {
+            tripMessage = context.getString(R.string.trip_no_trip_today)
+            return
+        }
+        val plan = TripPlan(routeId, route.name, direction.headsign, stops)
+        val needed = buildList {
+            addAll(LocationSource.PERMISSIONS)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) add(Manifest.permission.POST_NOTIFICATIONS)
+        }
+        pendingTrip = plan
+        tripPermissionLauncher.launch(needed.toTypedArray())
+    }
+
+    tripMessage?.let { message ->
+        AlertDialog(
+            onDismissRequest = { tripMessage = null },
+            text = { Text(message) },
+            confirmButton = { TextButton(onClick = { tripMessage = null }) { Text("OK") } },
+        )
+    }
+
     val homeDepartures = remember(repo, homeState, now) {
         homeState.station?.let { station ->
             repo.directions(station.routeId).map { direction ->
@@ -240,6 +348,10 @@ fun AppRoot() {
                 tomorrowFor = { direction ->
                     repo.departuresTomorrow(stop.id, route.id, direction.id)
                 },
+                destinationsFor = { direction ->
+                    repo.stops(route.id, direction.id).dropWhile { it.id != stop.id }.drop(1)
+                },
+                onStartTrip = { direction, destination -> startTrip(route.id, direction, stop, destination) },
                 schedule = repo.source,
                 bike = bike,
                 isPinned = isPinned,
@@ -269,6 +381,14 @@ fun AppRoot() {
             onRouteClick = { routeId = it.id },
             header = {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    activeTrip?.let { trip ->
+                        TripCard(
+                            trip = trip,
+                            soundEnabled = tripSound ?: true,
+                            onToggleSound = { TripTracker.setSoundEnabled(context, it) },
+                            onStop = { TripTracker.stop(context) },
+                        )
+                    }
                     ScheduleStatus(
                         source = repo.source,
                         syncing = scheduleSyncing,

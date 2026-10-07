@@ -60,4 +60,31 @@
     <string name="schedule_same_type_failed">Sem conexão com o Metrofor: mostrando os horários de %1$s, num dia do mesmo tipo. Os de hoje podem ser diferentes.</string>
     <string name="schedule_bundled">Horários de dia útil que vieram com o app. Conecte-se à internet para baixar os de hoje.</string>
     <string name="schedule_refresh">Baixar os horários de novo</string>
+
+    <string name="trip_start">Modo viagem</string>
+    <string name="trip_pick_destination">Para qual estação você vai?</string>
+    <string name="trip_no_trip_today">Não há mais viagens hoje neste sentido.</string>
+    <string name="trip_needs_location">O modo viagem precisa da permissão de localização.</string>
+    <string name="cancel">Cancelar</string>
+    <string name="trip_channel_ongoing">Viagem em andamento</string>
+    <string name="trip_channel_alert_sound">Aviso de chegada (com som)</string>
+    <string name="trip_channel_alert_silent">Aviso de chegada (sem som)</string>
+    <string name="trip_notification_title">Viagem até %1$s</string>
+    <string name="trip_waiting">Aguardando o trem em %1$s, previsto às %2$s.</string>
+    <string name="trip_progress_line">Em %1$s · destino em %2$s · chegada ~%3$s (%4$s)</string>
+    <string name="trip_fix_gps">pelo GPS</string>
+    <string name="trip_fix_schedule">pela tabela de horários</string>
+    <string name="trip_arrived">Você chegou a %1$s.</string>
+    <string name="trip_alert_title">Prepare-se para descer</string>
+    <string name="trip_alert_text">Faltam %1$s para %2$s.</string>
+    <plurals name="trip_stations_left">
+        <item quantity="one">%1$d estação</item>
+        <item quantity="other">%1$d estações</item>
+    </plurals>
+    <string name="trip_stop">Encerrar viagem</string>
+    <string name="trip_sound_on">Aviso sonoro ligado</string>
+    <string name="trip_sound_off">Aviso sonoro desligado</string>
+    <string name="trip_card_title">Modo viagem · %1$s</string>
+    <string name="trip_alert_sent">Aviso de descida enviado.</string>
+    <string name="trip_alert_at">Aviso em %1$s, duas estações antes.</string>
 </resources>

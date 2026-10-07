@@ -21,6 +21,27 @@ Sem permissão e sem estação fixada, o app continua inteiro: o cartão vira um
 convite e o resto funciona igual.
 
 A localização usa o `LocationManager` do próprio Android, sem Play Services.
+Com a tela inicial aberta e a estação vindo do GPS, o app segue a posição
+continuamente (a cada 10 s ou 30 m): ao descer em outra estação, o destaque
+muda sozinho. Uma estação fixada pela estrela continua tendo prioridade.
+
+### Modo viagem
+
+Na tela de partidas, o botão **Modo viagem** pergunta o destino (as estações
+seguintes no sentido escolhido) e acompanha a viagem num serviço em primeiro
+plano, com notificação fixa — funciona com a tela desligada:
+
+- **Onde o trem está.** Pelo GPS, quando a posição é precisa (≤150 m) e está a
+  até 300 m de uma estação do caminho. Cada estação confirmada mede o atraso
+  em relação à grade. Quando o sinal some (dentro do trem, no trecho
+  subterrâneo), a posição passa a sair **da tabela de horários**, corrigida
+  por esse atraso. A tela diz qual das duas fontes está valendo.
+- **Aviso duas estações antes do destino**, com notificação e vibração. O
+  botão de alto-falante no cartão da viagem liga ou desliga o **som**; com som,
+  o aviso usa o áudio de alarme, que toca mesmo com o celular no vibrar.
+- A viagem encerra sozinha ao chegar, ou 30 min depois da chegada prevista.
+- Precisa da permissão de localização (o Android não deixa o serviço rodar sem
+  ela) e, no Android 13+, pede também a de notificações.
 
 O app mostra a **estação do Bicicletar mais próxima** com nome, número,
 distância e capacidade de vagas, em dois lugares (são 253 estações no banco,

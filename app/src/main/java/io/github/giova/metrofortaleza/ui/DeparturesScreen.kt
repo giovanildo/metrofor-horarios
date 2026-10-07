@@ -28,6 +28,9 @@ import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.material.icons.filled.Navigation
+import androidx.compose.material3.Button
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -66,6 +69,8 @@ fun DeparturesScreen(
     directions: List<Direction>,
     departuresFor: (Direction) -> List<Int>,
     tomorrowFor: (Direction) -> List<Int>?,
+    destinationsFor: (Direction) -> List<Stop>,
+    onStartTrip: (Direction, Stop) -> Unit,
     schedule: ScheduleSource,
     bike: NearbyBike?,
     isPinned: Boolean,
@@ -88,6 +93,18 @@ fun DeparturesScreen(
     val tomorrow = remember(direction) { direction?.let(tomorrowFor) }
     val next = remember(all, tomorrow, now) { nextDepartures(all, now, NEXT_COUNT, tomorrow) }
     val sunday = remember(now) { isSundayToday() }
+    val destinations = remember(direction) { direction?.let(destinationsFor).orEmpty() }
+    var pickingDestination by remember { mutableStateOf(false) }
+    if (pickingDestination && direction != null) {
+        DestinationDialog(
+            stops = destinations,
+            onPick = {
+                pickingDestination = false
+                onStartTrip(direction, it)
+            },
+            onDismiss = { pickingDestination = false },
+        )
+    }
     // No domingo especial a regra de bike é desconhecida: melhor calar.
     val bikeRule = remember(route.id, now) {
         if (!sunday && route.id in BIKE_BOARDING_ROUTE_IDS) bikeBoarding(nowDayOfWeek(), now) else null
@@ -174,6 +191,18 @@ fun DeparturesScreen(
                                     DepartureRow(departure, now, highlighted = index == 0)
                                 }
                             }
+                        }
+                    }
+                }
+
+                if (destinations.isNotEmpty()) {
+                    item {
+                        Button(
+                            onClick = { pickingDestination = true },
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Icon(Icons.Filled.Navigation, contentDescription = null)
+                            Text(stringResource(R.string.trip_start), modifier = Modifier.padding(start = 8.dp))
                         }
                     }
                 }
