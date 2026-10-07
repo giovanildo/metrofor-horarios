@@ -12,7 +12,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
+import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalIconToggleButton
@@ -31,6 +33,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.github.giova.metrofortaleza.R
+import io.github.giova.metrofortaleza.data.Direction
+import io.github.giova.metrofortaleza.data.Station
 import io.github.giova.metrofortaleza.data.Stop
 import io.github.giova.metrofortaleza.data.TripFix
 import io.github.giova.metrofortaleza.data.formatTime
@@ -121,11 +125,49 @@ fun TripCard(
     }
 }
 
-/** Escolha do destino: as estações seguintes, no sentido escolhido. */
+/** Convite no topo da tela inicial: viajar a partir da estação em destaque. */
+@Composable
+fun TripStartCard(
+    origin: Station?,
+    onStart: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer),
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(16.dp),
+        ) {
+            Icon(Icons.Filled.Navigation, contentDescription = null)
+            Column(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                Text(
+                    text = stringResource(R.string.trip_start),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    text = if (origin != null) {
+                        stringResource(R.string.trip_start_from, origin.stopName, origin.routeName)
+                    } else {
+                        stringResource(R.string.trip_start_needs_station)
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+            if (origin != null) {
+                Button(onClick = onStart) { Text(stringResource(R.string.trip_start_button)) }
+            }
+        }
+    }
+}
+
+/** Escolha do destino: as estações seguintes, em cada sentido oferecido. */
 @Composable
 fun DestinationDialog(
-    stops: List<Stop>,
-    onPick: (Stop) -> Unit,
+    groups: List<Pair<Direction, List<Stop>>>,
+    onPick: (Direction, Stop) -> Unit,
     onDismiss: () -> Unit,
 ) {
     AlertDialog(
@@ -133,16 +175,28 @@ fun DestinationDialog(
         title = { Text(stringResource(R.string.trip_pick_destination)) },
         text = {
             LazyColumn(modifier = Modifier.heightIn(max = 420.dp)) {
-                items(stops, key = { it.id }) { stop ->
-                    Text(
-                        text = stop.name,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onPick(stop) }
-                            .padding(vertical = 12.dp),
-                    )
-                    HorizontalDivider()
+                groups.filter { it.second.isNotEmpty() }.forEach { (direction, stops) ->
+                    if (groups.size > 1) {
+                        item(key = "h${direction.id}") {
+                            Text(
+                                text = "→ ${direction.headsign}",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
+                            )
+                        }
+                    }
+                    items(stops, key = { "${direction.id}-${it.id}" }) { stop ->
+                        Text(
+                            text = stop.name,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onPick(direction, stop) }
+                                .padding(vertical = 12.dp),
+                        )
+                        HorizontalDivider()
+                    }
                 }
             }
         },

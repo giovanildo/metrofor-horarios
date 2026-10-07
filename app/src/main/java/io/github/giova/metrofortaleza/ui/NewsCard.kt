@@ -32,7 +32,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
-private const val COLLAPSED_COUNT = 5
+private const val COLLAPSED_COUNT = 3
 
 /** Manchetes recentes sobre o Metrofor, só para bater o olho. */
 @Composable

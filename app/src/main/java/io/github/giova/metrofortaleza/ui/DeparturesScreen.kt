@@ -97,10 +97,10 @@ fun DeparturesScreen(
     var pickingDestination by remember { mutableStateOf(false) }
     if (pickingDestination && direction != null) {
         DestinationDialog(
-            stops = destinations,
-            onPick = {
+            groups = listOf(direction to destinations),
+            onPick = { picked, stop ->
                 pickingDestination = false
-                onStartTrip(direction, it)
+                onStartTrip(picked, stop)
             },
             onDismiss = { pickingDestination = false },
         )

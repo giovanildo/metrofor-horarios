@@ -255,6 +255,28 @@ fun AppRoot() {
         tripPermissionLauncher.launch(needed.toTypedArray())
     }
 
+    // Modo viagem a partir do topo da tela inicial: origem = estação em destaque.
+    var pickingHomeDestination by remember { mutableStateOf(false) }
+    val homeOrigin = homeState.station
+    if (pickingHomeDestination && homeOrigin != null) {
+        val groups = remember(repo, homeOrigin) {
+            repo.directions(homeOrigin.routeId).map { direction ->
+                direction to repo.stops(homeOrigin.routeId, direction.id)
+                    .dropWhile { it.id != homeOrigin.stopId }
+                    .drop(1)
+            }
+        }
+        DestinationDialog(
+            groups = groups,
+            onPick = { direction, destination ->
+                pickingHomeDestination = false
+                val origin = Stop(homeOrigin.stopId, homeOrigin.stopName, seq = 0)
+                startTrip(homeOrigin.routeId, direction, origin, destination)
+            },
+            onDismiss = { pickingHomeDestination = false },
+        )
+    }
+
     tripMessage?.let { message ->
         AlertDialog(
             onDismissRequest = { tripMessage = null },
@@ -381,12 +403,18 @@ fun AppRoot() {
             onRouteClick = { routeId = it.id },
             header = {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    activeTrip?.let { trip ->
+                    val trip = activeTrip
+                    if (trip != null) {
                         TripCard(
                             trip = trip,
                             soundEnabled = tripSound ?: true,
                             onToggleSound = { TripTracker.setSoundEnabled(context, it) },
                             onStop = { TripTracker.stop(context) },
+                        )
+                    } else {
+                        TripStartCard(
+                            origin = homeState.station,
+                            onStart = { pickingHomeDestination = true },
                         )
                     }
                     ScheduleStatus(

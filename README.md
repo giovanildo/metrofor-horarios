@@ -27,9 +27,11 @@ muda sozinho. Uma estação fixada pela estrela continua tendo prioridade.
 
 ### Modo viagem
 
-Na tela de partidas, o botão **Modo viagem** pergunta o destino (as estações
-seguintes no sentido escolhido) e acompanha a viagem num serviço em primeiro
-plano, com notificação fixa — funciona com a tela desligada:
+O cartão **Modo viagem** fica no topo da tela inicial: a origem é a estação em
+destaque (GPS ou fixada) e o destino se escolhe entre as estações seguintes,
+nos dois sentidos. O mesmo botão existe na tela de partidas de cada estação.
+Durante a viagem, o cartão do topo passa a mostrar o andamento, e um serviço em
+primeiro plano, com notificação fixa, segue a viagem com a tela desligada:
 
 - **Onde o trem está.** Pelo GPS, quando a posição é precisa (≤150 m) e está a
   até 300 m de uma estação do caminho. Cada estação confirmada mede o atraso
@@ -64,8 +66,8 @@ domingo o aviso de bike some, porque nesse dia só há operação especial e a r
 dela não é conhecida. As regras estão fixas em `data/BikeBoarding.kt` — se o
 Metrofor mudar o regulamento, é lá que se mexe.
 
-A tela inicial termina com as **notícias do Metrofor**: só manchetes, fonte e
-data, para bater o olho e saber se vem alguma mudança (operação especial em
+A tela inicial termina com as **notícias do Metrofor**: as 3 manchetes mais
+recentes, com **Ver mais** para as anteriores; só título, fonte e data, para bater o olho e saber se vem alguma mudança (operação especial em
 eleição e ENEM, obras, feriado). Nem o site do Metrofor nem o do Governo do
 Ceará têm RSS ou API, então as manchetes vêm da busca RSS do Google Notícias
 (`metrofor OR "metrô de fortaleza" OR "VLT" Ceará`), limitada aos últimos 30

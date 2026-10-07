@@ -87,4 +87,7 @@
     <string name="trip_card_title">Modo viagem · %1$s</string>
     <string name="trip_alert_sent">Aviso de descida enviado.</string>
     <string name="trip_alert_at">Aviso em %1$s, duas estações antes.</string>
+    <string name="trip_start_from">Saindo de %1$s (%2$s). Aviso duas estações antes do destino.</string>
+    <string name="trip_start_needs_station">Use sua localização ou fixe uma estação para começar uma viagem.</string>
+    <string name="trip_start_button">Iniciar</string>
 </resources>
