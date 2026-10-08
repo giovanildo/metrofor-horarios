@@ -81,6 +81,18 @@ class LocationSource(private val context: Context) {
         }
     }
 
+    /** A posição mais precisa já guardada no aparelho, de até [maxAgeMillis] atrás. Não liga o GPS. */
+    @SuppressLint("MissingPermission") // hasPermission() barra o caminho antes
+    fun lastKnown(maxAgeMillis: Long): Location? {
+        if (!hasPermission()) return null
+        val manager = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager ?: return null
+        val cutoff = System.currentTimeMillis() - maxAgeMillis
+        return runCatching { manager.getProviders(true) }.getOrNull().orEmpty()
+            .mapNotNull { runCatching { manager.getLastKnownLocation(it) }.getOrNull() }
+            .filter { it.time >= cutoff }
+            .minByOrNull { it.accuracy }
+    }
+
     /**
      * Posições contínuas enquanto o Flow for coletado, de GPS e rede ao mesmo
      * tempo — dentro do trem o GPS some e a rede ainda ajuda. Sem permissão ou

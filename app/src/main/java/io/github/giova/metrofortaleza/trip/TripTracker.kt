@@ -28,6 +28,7 @@ object TripTracker {
     val active: StateFlow<ActiveTrip?> = _active.asStateFlow()
 
     private val _soundEnabled = MutableStateFlow<Boolean?>(null)
+    private val _stationAlerts = MutableStateFlow<Boolean?>(null)
 
     internal fun publish(trip: ActiveTrip?) {
         _active.value = trip
@@ -57,8 +58,22 @@ object TripTracker {
         _soundEnabled.value = enabled
     }
 
+    /** Se cada estação alcançada gera um aviso curto com som (desligado por padrão). */
+    fun stationAlerts(context: Context): StateFlow<Boolean?> {
+        if (_stationAlerts.value == null) _stationAlerts.value = prefs(context).getBoolean(KEY_STATION_ALERTS, false)
+        return _stationAlerts
+    }
+
+    fun isStationAlertsEnabled(context: Context): Boolean = stationAlerts(context).value ?: false
+
+    fun setStationAlerts(context: Context, enabled: Boolean) {
+        prefs(context).edit { putBoolean(KEY_STATION_ALERTS, enabled) }
+        _stationAlerts.value = enabled
+    }
+
     private fun prefs(context: Context) =
         context.applicationContext.getSharedPreferences("metrofor_prefs", Context.MODE_PRIVATE)
 
     private const val KEY_SOUND = "trip_alert_sound"
+    private const val KEY_STATION_ALERTS = "trip_station_alerts"
 }

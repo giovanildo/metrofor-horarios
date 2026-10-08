@@ -41,6 +41,20 @@ primeiro plano, com notificação fixa, segue a viagem com a tela desligada:
 - **Aviso duas estações antes do destino**, com notificação e vibração. O
   botão de alto-falante no cartão da viagem liga ou desliga o **som**; com som,
   o aviso usa o áudio de alarme, que toca mesmo com o celular no vibrar.
+- **Avisar cada estação (voz)**, opcional e desligado por padrão: a cada
+  estação alcançada, uma notificação curta e a voz do sistema (o "Conversão de
+  texto em voz" do Android, em pt-BR) dizem, por exemplo, "Parangaba. Faltam 5
+  estações para Benfica." Com o som ligado, o aviso de duas estações antes
+  também é falado. A voz sai pelo canal de navegação: toca no fone e abaixa a
+  música. Sem voz pt-BR instalada no aparelho, fica só a notificação.
+- **Distância até a partida.** Se a pessoa está a mais de **1 km** da estação de
+  partida, o app avisa antes de iniciar (até o GPS a encontrar na linha, a
+  posição sai só da tabela). A mais de **3 km**, a opção de modo viagem some,
+  na tela inicial e na de partidas. A distância vem do GPS da tela inicial ou,
+  com estação fixada, da última posição guardada no aparelho; sem posição
+  conhecida, o app deixa iniciar.
+- Durante a viagem, o cartão da estação em destaque some da tela inicial: o da
+  viagem já diz onde a pessoa está.
 - A viagem encerra sozinha ao chegar, ou 30 min depois da chegada prevista.
 - Precisa da permissão de localização (o Android não deixa o serviço rodar sem
   ela) e, no Android 13+, pede também a de notificações.

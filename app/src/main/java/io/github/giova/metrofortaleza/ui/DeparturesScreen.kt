@@ -71,6 +71,7 @@ fun DeparturesScreen(
     tomorrowFor: (Direction) -> List<Int>?,
     destinationsFor: (Direction) -> List<Stop>,
     onStartTrip: (Direction, Stop) -> Unit,
+    tripAllowed: Boolean,
     schedule: ScheduleSource,
     bike: NearbyBike?,
     isPinned: Boolean,
@@ -195,7 +196,7 @@ fun DeparturesScreen(
                     }
                 }
 
-                if (destinations.isNotEmpty()) {
+                if (tripAllowed && destinations.isNotEmpty()) {
                     item {
                         Button(
                             onClick = { pickingDestination = true },

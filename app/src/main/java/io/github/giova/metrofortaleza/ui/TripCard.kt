@@ -13,11 +13,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Navigation
+import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalIconToggleButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -47,6 +50,8 @@ fun TripCard(
     trip: ActiveTrip,
     soundEnabled: Boolean,
     onToggleSound: (Boolean) -> Unit,
+    stationAlerts: Boolean,
+    onToggleStationAlerts: (Boolean) -> Unit,
     onStop: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -117,7 +122,21 @@ fun TripCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 4.dp),
             )
-            Row(modifier = Modifier.padding(top = 8.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(top = 8.dp),
+            ) {
+                FilterChip(
+                    selected = stationAlerts,
+                    onClick = { onToggleStationAlerts(!stationAlerts) },
+                    label = { Text(stringResource(R.string.trip_station_alerts)) },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = if (stationAlerts) Icons.Filled.NotificationsActive else Icons.Filled.NotificationsOff,
+                            contentDescription = null,
+                        )
+                    },
+                )
                 Spacer(Modifier.weight(1f))
                 OutlinedButton(onClick = onStop) { Text(stringResource(R.string.trip_stop)) }
             }

@@ -27,12 +27,15 @@ internal object TripNotifications {
 
     const val ONGOING_ID = 1001
     private const val ALERT_ID = 1002
+    private const val STATION_ID = 1003
 
     private const val CHANNEL_ONGOING = "trip_ongoing"
     private const val CHANNEL_ALERT_SOUND = "trip_alert_sound"
     private const val CHANNEL_ALERT_SILENT = "trip_alert_silent"
+    private const val CHANNEL_STATION = "trip_station"
 
     private val VIBRATION = longArrayOf(0, 600, 300, 600, 300, 600)
+    private const val STATION_TIMEOUT_MILLIS = 60_000L
 
     fun createChannels(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
@@ -61,6 +64,14 @@ internal object TripNotifications {
                 vibrationPattern = VIBRATION
             },
         )
+        // Aviso de cada estação: som curto de notificação, não o de alarme.
+        manager.createNotificationChannel(
+            NotificationChannel(
+                CHANNEL_STATION,
+                context.getString(R.string.trip_channel_station),
+                NotificationManager.IMPORTANCE_HIGH,
+            ),
+        )
         manager.createNotificationChannel(
             NotificationChannel(
                 CHANNEL_ALERT_SILENT,
@@ -72,6 +83,35 @@ internal object TripNotifications {
                 vibrationPattern = VIBRATION
             },
         )
+    }
+
+    /** Aviso curto ao alcançar cada estação, quando a pessoa ligou essa opção. */
+    fun station(context: Context, trip: ActiveTrip) {
+        val plan = trip.plan
+        val index = trip.progress.index.coerceIn(0, plan.stops.lastIndex)
+        val left = trip.progress.stationsLeft(plan)
+        val text = if (index == plan.stops.lastIndex) {
+            context.getString(R.string.trip_arrived, plan.destination.name)
+        } else {
+            context.getString(
+                R.string.trip_station_text,
+                context.resources.getQuantityString(R.plurals.trip_stations_left, left, left),
+                plan.destination.name,
+            )
+        }
+        val notification = NotificationCompat.Builder(context, CHANNEL_STATION)
+            .setSmallIcon(R.drawable.ic_launcher)
+            .setContentTitle(plan.stops[index].name)
+            .setContentText(text)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setDefaults(NotificationCompat.DEFAULT_SOUND)
+            .setTimeoutAfter(STATION_TIMEOUT_MILLIS)
+            .setAutoCancel(true)
+            .setContentIntent(openApp(context))
+            .build()
+        runCatching {
+            context.getSystemService(NotificationManager::class.java).notify(STATION_ID, notification)
+        }
     }
 
     /** A notificação fixa enquanto a viagem dura. */

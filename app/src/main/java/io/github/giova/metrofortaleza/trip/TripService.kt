@@ -7,6 +7,7 @@ import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.ServiceCompat
+import io.github.giova.metrofortaleza.R
 import io.github.giova.metrofortaleza.data.LocationSource
 import io.github.giova.metrofortaleza.data.TripEstimator
 import io.github.giova.metrofortaleza.data.TripPlan
@@ -29,6 +30,7 @@ class TripService : Service() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var job: Job? = null
+    private var voice: TripVoice? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -61,16 +63,32 @@ class TripService : Service() {
         TripTracker.publish(trip)
 
         job?.cancel()
+        if (voice == null) voice = TripVoice(this)
         job = scope.launch {
+            // A origem não é anunciada: a pessoa já está nela.
+            var announced = 0
             fun update() {
                 val progress = estimator.progress(nowMinutes())
                 val arrived = progress.index >= plan.stops.lastIndex
                 var alerted = trip.alerted
+                var alertedNow = false
                 // Partiu da origem e chegou na estação de aviso (ou já passou dela).
                 if (!alerted && progress.index >= plan.alertIndex) {
                     alerted = true
+                    alertedNow = true
                     trip = trip.copy(progress = progress)
-                    TripNotifications.alert(this@TripService, trip, TripTracker.isSoundEnabled(this@TripService))
+                    val sound = TripTracker.isSoundEnabled(this@TripService)
+                    TripNotifications.alert(this@TripService, trip, sound)
+                    if (sound) voice?.speak(spokenAlert(trip))
+                }
+                // Estação nova alcançada. Na estação do aviso principal, ele já basta.
+                if (progress.index > announced) {
+                    announced = progress.index
+                    if (!alertedNow && TripTracker.isStationAlertsEnabled(this@TripService)) {
+                        val reached = trip.copy(progress = progress)
+                        TripNotifications.station(this@TripService, reached)
+                        voice?.speak(spokenStation(reached))
+                    }
                 }
                 trip = trip.copy(progress = progress, alerted = alerted, arrived = arrived)
                 TripTracker.publish(trip)
@@ -104,6 +122,29 @@ class TripService : Service() {
         return START_NOT_STICKY
     }
 
+    /** "Parangaba. Faltam 5 estações para Benfica." — ou a chegada. */
+    private fun spokenStation(trip: ActiveTrip): String {
+        val plan = trip.plan
+        val index = trip.progress.index.coerceIn(0, plan.stops.lastIndex)
+        if (index == plan.stops.lastIndex) return getString(R.string.trip_arrived, plan.destination.name)
+        val left = trip.progress.stationsLeft(plan)
+        return plan.stops[index].name + ". " + getString(
+            R.string.trip_station_text,
+            resources.getQuantityString(R.plurals.trip_stations_left, left, left),
+            plan.destination.name,
+        )
+    }
+
+    /** "Prepare-se para descer. Faltam 2 estações para Benfica." */
+    private fun spokenAlert(trip: ActiveTrip): String {
+        val left = trip.progress.stationsLeft(trip.plan)
+        return getString(R.string.trip_alert_title) + ". " + getString(
+            R.string.trip_alert_text,
+            resources.getQuantityString(R.plurals.trip_stations_left, left, left),
+            trip.plan.destination.name,
+        )
+    }
+
     private fun finish() {
         job?.cancel()
         TripTracker.publish(null)
@@ -113,6 +154,8 @@ class TripService : Service() {
 
     override fun onDestroy() {
         scope.cancel()
+        voice?.shutdown()
+        voice = null
         TripTracker.publish(null)
         super.onDestroy()
     }

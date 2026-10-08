@@ -90,4 +90,11 @@
     <string name="trip_start_from">Saindo de %1$s (%2$s). Aviso duas estações antes do destino.</string>
     <string name="trip_start_needs_station">Use sua localização ou fixe uma estação para começar uma viagem.</string>
     <string name="trip_start_button">Iniciar</string>
+    <string name="trip_station_alerts">Avisar cada estação (voz)</string>
+    <string name="trip_channel_station">Aviso a cada estação</string>
+    <string name="trip_station_text">Faltam %1$s para %2$s.</string>
+    <string name="trip_far_title">Longe da estação de partida</string>
+    <string name="trip_far_warning">Você está a %1$s de %2$s. Até o GPS te encontrar na linha, a posição vai sair só da tabela de horários. Iniciar mesmo assim?</string>
+    <string name="trip_far_start">Iniciar mesmo assim</string>
+    <string name="trip_too_far">Você está a %1$s de %2$s. O modo viagem só fica disponível a até 3 km da estação de partida.</string>
 </resources>

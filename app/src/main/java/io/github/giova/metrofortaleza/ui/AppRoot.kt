@@ -7,6 +7,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.res.stringResource
+import io.github.giova.metrofortaleza.data.distanceMeters
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -61,6 +63,14 @@ private const val TICK_MILLIS = 15_000L
 /** GPS da tela inicial: a cada 10 s, ou ao andar 30 m. */
 private const val HOME_GPS_INTERVAL_MILLIS = 10_000L
 private const val HOME_GPS_MIN_METERS = 30f
+
+/** Modo viagem: aviso acima de 1 km da estação de partida; acima de 3 km, some. */
+private const val TRIP_WARN_START_METERS = 1_000.0
+private const val TRIP_MAX_START_METERS = 3_000.0
+private const val USER_POSITION_MAX_AGE_MILLIS = 10L * 60 * 1000
+
+private fun formatKm(meters: Double): String =
+    if (meters < 1000) "${meters.toInt()} m" else "%.1f km".format(meters / 1000).replace('.', ',')
 
 /** Quem inicia a viagem já dentro do trem ainda pega a partida de até 2 min atrás. */
 private const val TRIP_LATE_BOARDING_MINUTES = 2
@@ -206,8 +216,26 @@ fun AppRoot() {
     }
 
     // ------------------------------------------------------------ viagem ----
+    // Onde a pessoa está: a posição do GPS da tela inicial, ou, com estação
+    // fixada, a última guardada no aparelho. `null` = não sabemos.
+    fun userDistanceTo(lat: Double, lon: Double): Double? {
+        val (userLat, userLon) = when (val state = homeState) {
+            is HomeStation.Nearby -> state.userLat to state.userLon
+            else -> locationSource.lastKnown(USER_POSITION_MAX_AGE_MILLIS)
+                ?.let { it.latitude to it.longitude }
+        } ?: return null
+        return distanceMeters(userLat, userLon, lat, lon)
+    }
+
+    /** Longe demais (ou posição desconhecida = deixa tentar). */
+    fun tripAllowedFrom(lat: Double, lon: Double): Boolean =
+        (userDistanceTo(lat, lon) ?: 0.0) <= TRIP_MAX_START_METERS
+
+    var farTrip by remember { mutableStateOf<Pair<TripPlan, Double>?>(null) }
+
     val activeTrip by TripTracker.active.collectAsState()
     val tripSound by TripTracker.soundEnabled(context).collectAsState()
+    val tripStationAlerts by TripTracker.stationAlerts(context).collectAsState()
     var pendingTrip by remember { mutableStateOf<TripPlan?>(null) }
     var tripMessage by remember { mutableStateOf<String?>(null) }
     val tripPermissionLauncher = rememberLauncherForActivityResult(
@@ -223,6 +251,15 @@ fun AppRoot() {
         } else if (plan != null) {
             tripMessage = context.getString(R.string.trip_needs_location)
         }
+    }
+
+    fun launchTrip(plan: TripPlan) {
+        val needed = buildList {
+            addAll(LocationSource.PERMISSIONS)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) add(Manifest.permission.POST_NOTIFICATIONS)
+        }
+        pendingTrip = plan
+        tripPermissionLauncher.launch(needed.toTypedArray())
     }
 
     fun startTrip(routeId: String, direction: Direction, origin: Stop, destination: Stop) {
@@ -247,12 +284,14 @@ fun AppRoot() {
             return
         }
         val plan = TripPlan(routeId, route.name, direction.headsign, stops)
-        val needed = buildList {
-            addAll(LocationSource.PERMISSIONS)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) add(Manifest.permission.POST_NOTIFICATIONS)
+        val distance = userDistanceTo(plan.origin.lat, plan.origin.lon)
+        when {
+            distance != null && distance > TRIP_MAX_START_METERS -> tripMessage = context.getString(
+                R.string.trip_too_far, formatKm(distance), plan.origin.name,
+            )
+            distance != null && distance > TRIP_WARN_START_METERS -> farTrip = plan to distance
+            else -> launchTrip(plan)
         }
-        pendingTrip = plan
-        tripPermissionLauncher.launch(needed.toTypedArray())
     }
 
     // Modo viagem a partir do topo da tela inicial: origem = estação em destaque.
@@ -274,6 +313,23 @@ fun AppRoot() {
                 startTrip(homeOrigin.routeId, direction, origin, destination)
             },
             onDismiss = { pickingHomeDestination = false },
+        )
+    }
+
+    farTrip?.let { (plan, distance) ->
+        AlertDialog(
+            onDismissRequest = { farTrip = null },
+            title = { Text(stringResource(R.string.trip_far_title)) },
+            text = { Text(stringResource(R.string.trip_far_warning, formatKm(distance), plan.origin.name)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    farTrip = null
+                    launchTrip(plan)
+                }) { Text(stringResource(R.string.trip_far_start)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { farTrip = null }) { Text(stringResource(R.string.cancel)) }
+            },
         )
     }
 
@@ -374,6 +430,9 @@ fun AppRoot() {
                     repo.stops(route.id, direction.id).dropWhile { it.id != stop.id }.drop(1)
                 },
                 onStartTrip = { direction, destination -> startTrip(route.id, direction, stop, destination) },
+                tripAllowed = remember(stop.id, route.id, homeState) {
+                    repo.station(stop.id, route.id)?.let { tripAllowedFrom(it.lat, it.lon) } ?: true
+                },
                 schedule = repo.source,
                 bike = bike,
                 isPinned = isPinned,
@@ -409,13 +468,19 @@ fun AppRoot() {
                             trip = trip,
                             soundEnabled = tripSound ?: true,
                             onToggleSound = { TripTracker.setSoundEnabled(context, it) },
+                            stationAlerts = tripStationAlerts ?: false,
+                            onToggleStationAlerts = { TripTracker.setStationAlerts(context, it) },
                             onStop = { TripTracker.stop(context) },
                         )
                     } else {
-                        TripStartCard(
-                            origin = homeState.station,
-                            onStart = { pickingHomeDestination = true },
-                        )
+                        val origin = homeState.station
+                        // A mais de 3 km da estação, o modo viagem não aparece.
+                        if (origin == null || tripAllowedFrom(origin.lat, origin.lon)) {
+                            TripStartCard(
+                                origin = origin,
+                                onStart = { pickingHomeDestination = true },
+                            )
+                        }
                     }
                     ScheduleStatus(
                         source = repo.source,
@@ -423,20 +488,23 @@ fun AppRoot() {
                         failed = scheduleSyncFailed,
                         onRefresh = { scheduleRequest++ },
                     )
-                    HomeStationCard(
-                        state = homeState,
-                        departures = homeDepartures,
-                        scheduleIsToday = repo.source.kind == ScheduleSource.Kind.TODAY,
-                        now = now,
-                        onUseLocation = {
-                            if (locationSource.hasPermission()) {
-                                scope.launch { locate() }
-                            } else {
-                                permissionLauncher.launch(LocationSource.PERMISSIONS)
-                            }
-                        },
-                        onOpenStation = ::openStation,
-                    )
+                    // Durante a viagem, o cartão dela já diz onde a pessoa está.
+                    if (trip == null) {
+                        HomeStationCard(
+                            state = homeState,
+                            departures = homeDepartures,
+                            scheduleIsToday = repo.source.kind == ScheduleSource.Kind.TODAY,
+                            now = now,
+                            onUseLocation = {
+                                if (locationSource.hasPermission()) {
+                                    scope.launch { locate() }
+                                } else {
+                                    permissionLauncher.launch(LocationSource.PERMISSIONS)
+                                }
+                            },
+                            onOpenStation = ::openStation,
+                        )
+                    }
                     homeBike?.let { HomeBikeCard(it) }
                     NewsCard(
                         headlines = headlines,
