@@ -6,6 +6,16 @@ direto do Metrofor** (veja [Horários do dia](#horários-do-dia)). Sem internet,
 tudo continua funcionando com a última cópia guardada no aparelho e, em último
 caso, com a grade que vem no APK.
 
+## Baixar
+
+**[⬇ Baixar a última versão (APK)](https://github.com/giovanildo/metro-fortaleza-horarios/releases/latest)**
+— Android 7 ou mais novo. Ao abrir o arquivo, permita instalar apps dessa fonte;
+se o Play Protect avisar "app não verificado", toque em *Mais detalhes →
+Instalar mesmo assim*. Para atualizar sozinho, use o
+[Obtainium](https://github.com/ImranR98/Obtainium) com o endereço deste
+repositório. Para divulgar, há uma imagem de story com QR code em
+[`divulgacao/`](divulgacao/).
+
 A tela inicial destaca uma estação com a próxima partida de cada sentido. Pelo
 GPS, se houver estações de **outras linhas a até 3 km**, cada linha ganha seu
 cartão (por exemplo, Chico da Silva na Linha Sul e Moura Brasil na Oeste, a
@@ -276,6 +286,23 @@ plugin `org.jetbrains.kotlin.android` aqui, só o do compilador do Compose.
 em 36 de propósito: subir o `targetSdk` muda comportamento em tempo de
 execução, e o app ainda não foi testado em aparelho. É a origem do único aviso
 de lint que sobrou.
+
+## Publicando uma versão no GitHub
+
+A release é assinada com uma chave própria, que fica **só na máquina de quem
+publica** (`~/.android/metro-fortaleza-release.jks`), com as senhas em
+`keystore.properties` na raiz — os dois fora do git. **Guarde uma cópia do
+`.jks` e das senhas num lugar seguro**: sem eles, as próximas versões não
+instalam por cima, e cada pessoa teria que desinstalar o app.
+
+```bash
+./gradlew assembleRelease            # app/build/outputs/apk/release/app-release.apk
+cp app/build/outputs/apk/release/app-release.apk metro-fortaleza.apk
+gh release create vX.Y metro-fortaleza.apk --notes-file notas.md
+```
+
+O arquivo vai sempre com o nome `metro-fortaleza.apk`, para o link
+`releases/latest/download/metro-fortaleza.apk` (e o QR code) nunca mudarem.
 
 ## Publicação no F-Droid
 

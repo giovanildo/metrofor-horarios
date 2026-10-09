@@ -10,3 +10,7 @@ captures/
 
 # estado do verificador semanal: muda a cada execucao
 tools/data-state.json
+
+# assinatura de release: fica so na maquina
+keystore.properties
+*.jks

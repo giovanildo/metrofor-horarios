@@ -1,8 +1,16 @@
+import java.util.Properties
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+}
+
+// Assinatura da release (o APK distribuido pelo GitHub). O keystore.properties
+// fica so na maquina de quem publica (fora do git); sem ele -- no F-Droid, por
+// exemplo, que assina com a propria chave -- a release sai sem assinatura.
+val signingProps = rootProject.file("keystore.properties").takeIf { it.exists() }?.let { file ->
+    Properties().apply { file.inputStream().use(::load) }
 }
 
 android {
@@ -20,8 +28,20 @@ android {
         versionName = "1.7"
     }
 
+    signingConfigs {
+        if (signingProps != null) {
+            create("release") {
+                storeFile = file(signingProps.getProperty("storeFile"))
+                storePassword = signingProps.getProperty("storePassword")
+                keyAlias = signingProps.getProperty("keyAlias")
+                keyPassword = signingProps.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
+            signingConfigs.findByName("release")?.let { signingConfig = it }
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
