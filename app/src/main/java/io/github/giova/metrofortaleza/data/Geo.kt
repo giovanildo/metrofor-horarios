@@ -27,6 +27,19 @@ fun List<Station>.nearestTo(lat: Double, lon: Double): Pair<Station, Double>? =
     map { it to distanceMeters(lat, lon, it.lat, it.lon) }
         .minByOrNull { (_, distance) -> distance }
 
+/** A estação mais próxima de cada linha, da mais perto para a mais longe. */
+fun List<Station>.nearestPerRoute(lat: Double, lon: Double): List<Pair<Station, Double>> =
+    map { it to distanceMeters(lat, lon, it.lat, it.lon) }
+        .groupBy { (station, _) -> station.routeId }
+        .map { (_, candidates) -> candidates.minBy { it.second } }
+        .sortedBy { it.second }
+
+/**
+ * Raio em que outras linhas também ganham cartão na tela inicial — por
+ * exemplo Chico da Silva (Sul) e Moura Brasil (Oeste), a ~200 m uma da outra.
+ */
+const val NEARBY_LINES_MAX_METERS = 3_000.0
+
 /**
  * Distância a pé que ainda vale a pena para pegar uma bicicleta. Acima disso o
  * app não mostra nada, porque "Bicicletar a 2 km" não ajuda ninguém.

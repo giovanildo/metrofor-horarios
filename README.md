@@ -6,8 +6,11 @@ direto do Metrofor** (veja [Horários do dia](#horários-do-dia)) e também as
 **manchetes de notícias**. Sem internet, tudo continua funcionando com a última
 cópia guardada no aparelho e, em último caso, com a grade que vem no APK.
 
-A tela inicial destaca uma estação com a próxima partida de cada sentido. Ela
-pode vir de duas fontes:
+A tela inicial destaca uma estação com a próxima partida de cada sentido. Pelo
+GPS, se houver estações de **outras linhas a até 3 km**, cada linha ganha seu
+cartão (por exemplo, Chico da Silva na Linha Sul e Moura Brasil na Oeste, a
+~200 m uma da outra), e o modo viagem oferece todas como ponto de partida. A
+estação em destaque pode vir de duas fontes:
 
 - **A mais próxima de você**, o que exige `ACCESS_FINE_LOCATION`. A permissão só
   é pedida quando você toca no botão, nunca ao abrir o app, e as features de
@@ -38,6 +41,14 @@ primeiro plano, com notificação fixa, segue a viagem com a tela desligada:
   em relação à grade. Quando o sinal some (dentro do trem, no trecho
   subterrâneo), a posição passa a sair **da tabela de horários**, corrigida
   por esse atraso. A tela diz qual das duas fontes está valendo.
+- **Quando o GPS é dado como perdido.** Depois de **1 minuto** sem nenhuma
+  posição boa (12 tentativas, uma a cada 5 s) — menos que os ~2 min entre duas
+  estações. A partir daí o cartão mostra em vermelho "Sem GPS há N min: a
+  posição é presumida pela tabela de horários…", a notificação fixa ganha
+  "sem GPS há N min", e todo aviso baseado na tabela diz isso: a estação vira
+  "Provavelmente Parangaba" e o aviso de descida começa com "Pela tabela de
+  horários". A tabela é a "média" da viagem: os horários programados do
+  Metrofor, deslocados pelo atraso que o GPS mediu na última estação vista.
 - **Aviso duas estações antes do destino**, com notificação e vibração. O
   botão de alto-falante no cartão da viagem liga ou desliga o **som**; com som,
   o aviso usa o áudio de alarme, que toca mesmo com o celular no vibrar.

@@ -50,6 +50,7 @@ fun HomeStationCard(
     onUseLocation: () -> Unit,
     onOpenStation: (Station) -> Unit,
     modifier: Modifier = Modifier,
+    showRefresh: Boolean = true,
 ) {
     Card(
         colors = CardDefaults.cardColors(
@@ -83,7 +84,7 @@ fun HomeStationCard(
                 departures = departures,
                 scheduleIsToday = scheduleIsToday,
                 now = now,
-                onRefresh = onUseLocation,
+                onRefresh = onUseLocation.takeIf { showRefresh },
                 onClick = { onOpenStation(state.station) },
             )
 

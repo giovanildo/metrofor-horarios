@@ -101,7 +101,13 @@ internal object TripNotifications {
         }
         val notification = NotificationCompat.Builder(context, CHANNEL_STATION)
             .setSmallIcon(R.drawable.ic_launcher)
-            .setContentTitle(plan.stops[index].name)
+            .setContentTitle(
+                if (trip.progress.presumed) {
+                    context.getString(R.string.trip_station_presumed, plan.stops[index].name)
+                } else {
+                    plan.stops[index].name
+                },
+            )
             .setContentText(text)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setDefaults(NotificationCompat.DEFAULT_SOUND)
@@ -131,7 +137,9 @@ internal object TripNotifications {
                 context.resources.getQuantityString(R.plurals.trip_stations_left, left, left),
                 formatTime(progress.arrivalMinutes.roundToInt()),
                 context.getString(if (progress.fix == TripFix.GPS) R.string.trip_fix_gps else R.string.trip_fix_schedule),
-            )
+            ) + (progress.gpsSilentMinutes?.let {
+                " · " + context.getString(R.string.trip_gps_lost_short, it.toInt().coerceAtLeast(1))
+            } ?: "")
         }
         return NotificationCompat.Builder(context, CHANNEL_ONGOING)
             .setSmallIcon(R.drawable.ic_launcher)
@@ -152,7 +160,7 @@ internal object TripNotifications {
             R.string.trip_alert_text,
             context.resources.getQuantityString(R.plurals.trip_stations_left, left, left),
             trip.plan.destination.name,
-        )
+        ).let { if (trip.progress.presumed) context.getString(R.string.trip_presumed_prefix) + ": " + it else it }
         val notification = NotificationCompat.Builder(context, if (sound) CHANNEL_ALERT_SOUND else CHANNEL_ALERT_SILENT)
             .setSmallIcon(R.drawable.ic_launcher)
             .setContentTitle(context.getString(R.string.trip_alert_title))

@@ -28,6 +28,8 @@ sealed interface HomeStation {
         val distanceMeters: Double,
         val userLat: Double,
         val userLon: Double,
+        /** As estações mais próximas das outras linhas, a até 3 km. */
+        val others: List<Pair<Station, Double>> = emptyList(),
     ) : HomeStation
 
     /** Escolhida à mão pela pessoa. */

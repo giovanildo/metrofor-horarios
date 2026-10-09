@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
+import androidx.compose.material.icons.filled.GpsOff
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.NotificationsOff
@@ -112,6 +113,26 @@ fun TripCard(
                 },
                 style = MaterialTheme.typography.bodyMedium,
             )
+            progress.gpsSilentMinutes?.let { silent ->
+                if (!trip.arrived) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(top = 8.dp),
+                    ) {
+                        Icon(
+                            Icons.Filled.GpsOff,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error,
+                        )
+                        Text(
+                            text = stringResource(R.string.trip_gps_lost, silent.toInt().coerceAtLeast(1)),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(start = 8.dp),
+                        )
+                    }
+                }
+            }
             Text(
                 text = if (trip.alerted) {
                     stringResource(R.string.trip_alert_sent)
@@ -147,7 +168,7 @@ fun TripCard(
 /** Convite no topo da tela inicial: viajar a partir da estação em destaque. */
 @Composable
 fun TripStartCard(
-    origin: Station?,
+    origins: List<Station>,
     onStart: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -167,51 +188,64 @@ fun TripStartCard(
                     fontWeight = FontWeight.Bold,
                 )
                 Text(
-                    text = if (origin != null) {
-                        stringResource(R.string.trip_start_from, origin.stopName, origin.routeName)
+                    text = if (origins.isNotEmpty()) {
+                        stringResource(
+                            R.string.trip_start_from,
+                            origins.joinToString(" ou ") { "${it.stopName} (${it.routeName})" },
+                        )
                     } else {
                         stringResource(R.string.trip_start_needs_station)
                     },
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
-            if (origin != null) {
+            if (origins.isNotEmpty()) {
                 Button(onClick = onStart) { Text(stringResource(R.string.trip_start_button)) }
             }
         }
     }
 }
 
-/** Escolha do destino: as estações seguintes, em cada sentido oferecido. */
+/** Um bloco da lista de destinos: uma linha, saindo de uma estação, num sentido. */
+data class DestinationGroup(
+    val title: String,
+    val routeId: String,
+    val origin: Stop,
+    val direction: Direction,
+    val stops: List<Stop>,
+)
+
+/** Escolha do destino: as estações seguintes, em cada linha e sentido oferecidos. */
 @Composable
 fun DestinationDialog(
-    groups: List<Pair<Direction, List<Stop>>>,
-    onPick: (Direction, Stop) -> Unit,
+    groups: List<DestinationGroup>,
+    onPick: (DestinationGroup, Stop) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    val shown = groups.filter { it.stops.isNotEmpty() }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.trip_pick_destination)) },
         text = {
             LazyColumn(modifier = Modifier.heightIn(max = 420.dp)) {
-                groups.filter { it.second.isNotEmpty() }.forEach { (direction, stops) ->
-                    if (groups.size > 1) {
-                        item(key = "h${direction.id}") {
+                shown.forEachIndexed { groupIndex, group ->
+                    if (shown.size > 1) {
+                        item(key = "h$groupIndex") {
                             Text(
-                                text = "→ ${direction.headsign}",
+                                text = group.title,
                                 style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
                             )
                         }
                     }
-                    items(stops, key = { "${direction.id}-${it.id}" }) { stop ->
+                    items(group.stops, key = { "$groupIndex-${it.id}" }) { stop ->
                         Text(
                             text = stop.name,
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { onPick(direction, stop) }
+                                .clickable { onPick(group, stop) }
                                 .padding(vertical = 12.dp),
                         )
                         HorizontalDivider()

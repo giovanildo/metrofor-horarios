@@ -73,7 +73,7 @@
     <string name="trip_waiting">Aguardando o trem em %1$s, previsto às %2$s.</string>
     <string name="trip_progress_line">Em %1$s · destino em %2$s · chegada ~%3$s (%4$s)</string>
     <string name="trip_fix_gps">pelo GPS</string>
-    <string name="trip_fix_schedule">pela tabela de horários</string>
+    <string name="trip_fix_schedule">presumida pela tabela de horários</string>
     <string name="trip_arrived">Você chegou a %1$s.</string>
     <string name="trip_alert_title">Prepare-se para descer</string>
     <string name="trip_alert_text">Faltam %1$s para %2$s.</string>
@@ -87,7 +87,7 @@
     <string name="trip_card_title">Modo viagem · %1$s</string>
     <string name="trip_alert_sent">Aviso de descida enviado.</string>
     <string name="trip_alert_at">Aviso em %1$s, duas estações antes.</string>
-    <string name="trip_start_from">Saindo de %1$s (%2$s). Aviso duas estações antes do destino.</string>
+    <string name="trip_start_from">Saindo de %1$s. Aviso duas estações antes do destino.</string>
     <string name="trip_start_needs_station">Use sua localização ou fixe uma estação para começar uma viagem.</string>
     <string name="trip_start_button">Iniciar</string>
     <string name="trip_station_alerts">Avisar cada estação (voz)</string>
@@ -97,4 +97,8 @@
     <string name="trip_far_warning">Você está a %1$s de %2$s. Até o GPS te encontrar na linha, a posição vai sair só da tabela de horários. Iniciar mesmo assim?</string>
     <string name="trip_far_start">Iniciar mesmo assim</string>
     <string name="trip_too_far">Você está a %1$s de %2$s. O modo viagem só fica disponível a até 3 km da estação de partida.</string>
+    <string name="trip_gps_lost">Sem GPS há %1$d min: a posição é presumida pela tabela de horários, corrigida pelo último atraso medido. Confira o nome das estações pela janela.</string>
+    <string name="trip_gps_lost_short">sem GPS há %1$d min</string>
+    <string name="trip_presumed_prefix">Pela tabela de horários</string>
+    <string name="trip_station_presumed">Provavelmente %1$s</string>
 </resources>

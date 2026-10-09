@@ -128,7 +128,12 @@ class TripService : Service() {
         val index = trip.progress.index.coerceIn(0, plan.stops.lastIndex)
         if (index == plan.stops.lastIndex) return getString(R.string.trip_arrived, plan.destination.name)
         val left = trip.progress.stationsLeft(plan)
-        return plan.stops[index].name + ". " + getString(
+        val name = if (trip.progress.presumed) {
+            getString(R.string.trip_station_presumed, plan.stops[index].name)
+        } else {
+            plan.stops[index].name
+        }
+        return name + ". " + getString(
             R.string.trip_station_text,
             resources.getQuantityString(R.plurals.trip_stations_left, left, left),
             plan.destination.name,
@@ -138,11 +143,12 @@ class TripService : Service() {
     /** "Prepare-se para descer. Faltam 2 estações para Benfica." */
     private fun spokenAlert(trip: ActiveTrip): String {
         val left = trip.progress.stationsLeft(trip.plan)
-        return getString(R.string.trip_alert_title) + ". " + getString(
+        val prefix = if (trip.progress.presumed) getString(R.string.trip_presumed_prefix) + ", " else ""
+        return getString(R.string.trip_alert_title) + ". " + prefix + getString(
             R.string.trip_alert_text,
             resources.getQuantityString(R.plurals.trip_stations_left, left, left),
             trip.plan.destination.name,
-        )
+        ).replaceFirstChar { if (prefix.isNotEmpty()) it.lowercaseChar() else it }
     }
 
     private fun finish() {

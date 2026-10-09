@@ -72,7 +72,14 @@ data class TripProgress(
     val delayMinutes: Double,
     /** Previsão de chegada ao destino, em minutos desde a meia-noite. */
     val arrivalMinutes: Double,
+    /**
+     * Há quantos minutos não chega posição de GPS boa, quando passou de
+     * [TripEstimator.GPS_LOST_MINUTES]; `null` = GPS respondendo.
+     */
+    val gpsSilentMinutes: Double? = null,
 ) {
+    /** A posição é presumida pela tabela de horários, não vista pelo GPS. */
+    val presumed: Boolean get() = fix == TripFix.SCHEDULE
     fun stationsLeft(plan: TripPlan): Int = (plan.stops.lastIndex - index.coerceAtLeast(0)).coerceAtLeast(0)
 }
 
@@ -87,10 +94,14 @@ class TripEstimator(private val plan: TripPlan) {
     private var index = -1
     private var delay = 0.0
     private var lastFix = TripFix.SCHEDULE
+    private var startedAt: Double? = null
+    private var lastGoodGps: Double? = null
 
     /** Uma posição de GPS. Só conta se for precisa e estiver perto de uma estação da viagem. */
     fun onLocation(lat: Double, lon: Double, accuracyMeters: Float, nowMinutes: Double) {
         if (accuracyMeters > MAX_ACCURACY_METERS) return
+        // Posição boa, mesmo longe de estação: o GPS está alcançável.
+        lastGoodGps = nowMinutes
         val (nearest, distance) = plan.stops.withIndex()
             .map { (i, stop) -> i to distanceMeters(lat, lon, stop.lat, stop.lon) }
             .minBy { it.second }
@@ -115,19 +126,29 @@ class TripEstimator(private val plan: TripPlan) {
             index = bySchedule
             lastFix = TripFix.SCHEDULE
         }
+        val since = lastGoodGps ?: startedAt ?: nowMinutes.also { startedAt = it }
+        val silent = nowMinutes - since
         return TripProgress(
             index = index,
             fix = lastFix,
             delayMinutes = delay,
             arrivalMinutes = plan.destination.scheduled + delay,
+            gpsSilentMinutes = silent.takeIf { it >= GPS_LOST_MINUTES },
         )
     }
 
-    private companion object {
-        const val MAX_ACCURACY_METERS = 150f
-        const val STATION_RADIUS_METERS = 300.0
-        const val CONFIDENT_ACCURACY_METERS = 40f
-        const val CONFIDENT_RADIUS_METERS = 150.0
-        const val MAX_DELAY_MINUTES = 30.0
+    companion object {
+        /**
+         * Sem posição boa por 1 minuto (12 tentativas, uma a cada 5 s), o GPS é
+         * dado como inalcançável. É menos que o tempo entre duas estações
+         * (~2 min), então o aviso aparece antes de a estimativa errar de estação.
+         */
+        const val GPS_LOST_MINUTES = 1.0
+
+        private const val MAX_ACCURACY_METERS = 150f
+        private const val STATION_RADIUS_METERS = 300.0
+        private const val CONFIDENT_ACCURACY_METERS = 40f
+        private const val CONFIDENT_RADIUS_METERS = 150.0
+        private const val MAX_DELAY_MINUTES = 30.0
     }
 }

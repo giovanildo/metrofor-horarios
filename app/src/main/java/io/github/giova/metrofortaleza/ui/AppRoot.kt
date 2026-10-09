@@ -50,7 +50,8 @@ import io.github.giova.metrofortaleza.data.ScheduleSource
 import io.github.giova.metrofortaleza.data.ScheduleStore
 import io.github.giova.metrofortaleza.data.Station
 import io.github.giova.metrofortaleza.data.nearestBikeTo
-import io.github.giova.metrofortaleza.data.nearestTo
+import io.github.giova.metrofortaleza.data.NEARBY_LINES_MAX_METERS
+import io.github.giova.metrofortaleza.data.nearestPerRoute
 import io.github.giova.metrofortaleza.data.nextDepartures
 import io.github.giova.metrofortaleza.data.nowMinutes
 import kotlinx.coroutines.Dispatchers
@@ -140,6 +141,15 @@ fun AppRoot() {
         }
     }
 
+    // A estação mais próxima em destaque e, a até 3 km, a mais próxima de cada
+    // outra linha — cada uma ganha seu cartão.
+    fun nearbyState(stations: List<Station>, lat: Double, lon: Double): HomeStation.Nearby? {
+        val perRoute = stations.nearestPerRoute(lat, lon)
+        val (main, distance) = perRoute.firstOrNull() ?: return null
+        val others = perRoute.drop(1).filter { it.second <= NEARBY_LINES_MAX_METERS }
+        return HomeStation.Nearby(main, distance, lat, lon, others)
+    }
+
     suspend fun locate() {
         homeState = HomeStation.Locating
         val position = locationSource.current()
@@ -147,13 +157,8 @@ fun AppRoot() {
             homeState = HomeStation.Unavailable(HomeStation.Reason.NO_FIX)
             return
         }
-        val nearest = withContext(Dispatchers.IO) {
-            repo.stations().nearestTo(position.latitude, position.longitude)
-        }
-        homeState = nearest
-            ?.let { (station, distance) ->
-                HomeStation.Nearby(station, distance, position.latitude, position.longitude)
-            }
+        val stations = withContext(Dispatchers.IO) { repo.stations() }
+        homeState = nearbyState(stations, position.latitude, position.longitude)
             ?: HomeStation.Unavailable(HomeStation.Reason.NO_FIX)
     }
 
@@ -209,9 +214,7 @@ fun AppRoot() {
         if (!followGps) return@LaunchedEffect
         val stations = withContext(Dispatchers.IO) { repo.stations() }
         locationSource.updates(HOME_GPS_INTERVAL_MILLIS, HOME_GPS_MIN_METERS).collect { position ->
-            stations.nearestTo(position.latitude, position.longitude)?.let { (station, distance) ->
-                homeState = HomeStation.Nearby(station, distance, position.latitude, position.longitude)
-            }
+            nearbyState(stations, position.latitude, position.longitude)?.let { homeState = it }
         }
     }
 
@@ -294,23 +297,37 @@ fun AppRoot() {
         }
     }
 
-    // Modo viagem a partir do topo da tela inicial: origem = estação em destaque.
+    // Outras linhas a até 3 km (cada uma ganha cartão próprio na tela inicial).
+    val otherLines = (homeState as? HomeStation.Nearby)?.others.orEmpty()
+
+    // Modo viagem a partir do topo da tela inicial: origens = estações em
+    // destaque (uma por linha, a até 3 km), destinos nos dois sentidos.
     var pickingHomeDestination by remember { mutableStateOf(false) }
-    val homeOrigin = homeState.station
-    if (pickingHomeDestination && homeOrigin != null) {
-        val groups = remember(repo, homeOrigin) {
-            repo.directions(homeOrigin.routeId).map { direction ->
-                direction to repo.stops(homeOrigin.routeId, direction.id)
-                    .dropWhile { it.id != homeOrigin.stopId }
-                    .drop(1)
+    val tripOrigins = buildList {
+        homeState.station?.let(::add)
+        otherLines.forEach { add(it.first) }
+    }.filter { tripAllowedFrom(it.lat, it.lon) }
+    if (pickingHomeDestination && tripOrigins.isNotEmpty()) {
+        val groups = remember(repo, tripOrigins) {
+            tripOrigins.flatMap { origin ->
+                repo.directions(origin.routeId).map { direction ->
+                    DestinationGroup(
+                        title = "${origin.routeName} · ${origin.stopName} → ${direction.headsign}",
+                        routeId = origin.routeId,
+                        origin = Stop(origin.stopId, origin.stopName, seq = 0),
+                        direction = direction,
+                        stops = repo.stops(origin.routeId, direction.id)
+                            .dropWhile { it.id != origin.stopId }
+                            .drop(1),
+                    )
+                }
             }
         }
         DestinationDialog(
             groups = groups,
-            onPick = { direction, destination ->
+            onPick = { group, destination ->
                 pickingHomeDestination = false
-                val origin = Stop(homeOrigin.stopId, homeOrigin.stopName, seq = 0)
-                startTrip(homeOrigin.routeId, direction, origin, destination)
+                startTrip(group.routeId, group.direction, group.origin, destination)
             },
             onDismiss = { pickingHomeDestination = false },
         )
@@ -341,20 +358,24 @@ fun AppRoot() {
         )
     }
 
+    fun departuresAt(station: Station): List<HomeDeparture> =
+        repo.directions(station.routeId).map { direction ->
+            HomeDeparture(
+                headsign = direction.headsign,
+                departure = nextDepartures(
+                    repo.departures(station.stopId, station.routeId, direction.id),
+                    now,
+                    count = 1,
+                    tomorrow = repo.departuresTomorrow(station.stopId, station.routeId, direction.id),
+                ).firstOrNull(),
+            )
+        }
+
     val homeDepartures = remember(repo, homeState, now) {
-        homeState.station?.let { station ->
-            repo.directions(station.routeId).map { direction ->
-                HomeDeparture(
-                    headsign = direction.headsign,
-                    departure = nextDepartures(
-                        repo.departures(station.stopId, station.routeId, direction.id),
-                        now,
-                        count = 1,
-                        tomorrow = repo.departuresTomorrow(station.stopId, station.routeId, direction.id),
-                    ).firstOrNull(),
-                )
-            }
-        }.orEmpty()
+        homeState.station?.let(::departuresAt).orEmpty()
+    }
+    val otherDepartures = remember(repo, homeState, now) {
+        otherLines.map { (station, _) -> departuresAt(station) }
     }
 
     // Com GPS, o Bicicletar mais perto da pessoa; com estação fixada, o da estação.
@@ -473,11 +494,10 @@ fun AppRoot() {
                             onStop = { TripTracker.stop(context) },
                         )
                     } else {
-                        val origin = homeState.station
-                        // A mais de 3 km da estação, o modo viagem não aparece.
-                        if (origin == null || tripAllowedFrom(origin.lat, origin.lon)) {
+                        // A mais de 3 km de qualquer estação, o modo viagem não aparece.
+                        if (homeState.station == null || tripOrigins.isNotEmpty()) {
                             TripStartCard(
-                                origin = origin,
+                                origins = tripOrigins,
                                 onStart = { pickingHomeDestination = true },
                             )
                         }
@@ -504,6 +524,18 @@ fun AppRoot() {
                             },
                             onOpenStation = ::openStation,
                         )
+                        otherLines.forEachIndexed { i, (station, distance) ->
+                            val nearby = homeState as HomeStation.Nearby
+                            HomeStationCard(
+                                state = HomeStation.Nearby(station, distance, nearby.userLat, nearby.userLon),
+                                departures = otherDepartures.getOrElse(i) { emptyList() },
+                                scheduleIsToday = repo.source.kind == ScheduleSource.Kind.TODAY,
+                                now = now,
+                                onUseLocation = {},
+                                onOpenStation = ::openStation,
+                                showRefresh = false,
+                            )
+                        }
                     }
                     homeBike?.let { HomeBikeCard(it) }
                     NewsCard(
