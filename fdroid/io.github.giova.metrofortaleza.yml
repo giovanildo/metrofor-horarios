@@ -14,14 +14,14 @@ RepoType: git
 Repo: https://github.com/giovanildo/metro-fortaleza-horarios.git
 
 Builds:
-  - versionName: '1.8'
-    versionCode: 9
-    commit: v1.8
+  - versionName: '1.9'
+    versionCode: 10
+    commit: v1.9
     subdir: app
     gradle:
       - yes
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: '1.8'
-CurrentVersionCode: 9
+CurrentVersion: '1.9'
+CurrentVersionCode: 10
