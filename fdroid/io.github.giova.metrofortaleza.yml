@@ -1,0 +1,27 @@
+# Receita para o repositório fdroiddata (https://gitlab.com/fdroid/fdroiddata),
+# em metadata/io.github.giova.metrofortaleza.yml. Textos e imagens da loja vêm
+# de fastlane/metadata/android/ neste repositório.
+Categories:
+  - Navigation
+License: GPL-3.0-or-later
+AuthorName: Giovanildo
+SourceCode: https://github.com/giovanildo/metro-fortaleza-horarios
+IssueTracker: https://github.com/giovanildo/metro-fortaleza-horarios/issues
+
+AutoName: Metrô Fortaleza
+
+RepoType: git
+Repo: https://github.com/giovanildo/metro-fortaleza-horarios.git
+
+Builds:
+  - versionName: '1.7'
+    versionCode: 8
+    commit: v1.7
+    subdir: app
+    gradle:
+      - yes
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: '1.7'
+CurrentVersionCode: 8

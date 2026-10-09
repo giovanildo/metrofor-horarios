@@ -1,0 +1,4 @@
+• Tela Sobre, com aviso de app não oficial, fontes dos dados, licença e apoio via Pix.
+• Modo viagem: aviso de posição presumida quando o GPS some; voz a cada estação; aviso de distância até a estação de partida.
+• Um cartão por linha quando há mais de uma linha a até 3 km.
+• Removida a seção de notícias.
