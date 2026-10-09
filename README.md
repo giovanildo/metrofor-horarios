@@ -21,6 +21,13 @@ link escrito e um espaço livre embaixo para a figurinha de link do Instagram. O
 QR leva a `releases/latest`. Imagem não tem link clicável: no Instagram use a
 figurinha "Link"; no status do WhatsApp, poste o link num status de texto.
 
+Há também sequências com as telas do app e o link no rodapé, para o status:
+`story-tela-1..3.png` (tela inicial, horários, modo viagem) e
+`story-casa-1..4.png`, que conta a ida de casa até o metrô (de Pacatuba, a
+1,5 km de Carlito Benevides, até José de Alencar) e termina com o aviso de
+descida. No status do WhatsApp, o link escrito na **legenda** da imagem fica
+clicável.
+
 A tela inicial destaca uma estação com a próxima partida de cada sentido. Pelo
 GPS, se houver estações de **outras linhas a até 3 km**, cada linha ganha seu
 cartão (por exemplo, Chico da Silva na Linha Sul e Moura Brasil na Oeste, a
