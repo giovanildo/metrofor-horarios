@@ -2,9 +2,9 @@
 
 App Android **não oficial** com os horários das linhas do Metrofor (Fortaleza,
 Sobral e Cariri). Uma vez por dia, ao abrir, o app **baixa os horários do dia
-direto do Metrofor** (veja [Horários do dia](#horários-do-dia)) e também as
-**manchetes de notícias**. Sem internet, tudo continua funcionando com a última
-cópia guardada no aparelho e, em último caso, com a grade que vem no APK.
+direto do Metrofor** (veja [Horários do dia](#horários-do-dia)). Sem internet,
+tudo continua funcionando com a última cópia guardada no aparelho e, em último
+caso, com a grade que vem no APK.
 
 A tela inicial destaca uma estação com a próxima partida de cada sentido. Pelo
 GPS, se houver estações de **outras linhas a até 3 km**, cada linha ganha seu
@@ -91,14 +91,10 @@ domingo o aviso de bike some, porque nesse dia só há operação especial e a r
 dela não é conhecida. As regras estão fixas em `data/BikeBoarding.kt` — se o
 Metrofor mudar o regulamento, é lá que se mexe.
 
-A tela inicial termina com as **notícias do Metrofor**: as 3 manchetes mais
-recentes, com **Ver mais** para as anteriores; só título, fonte e data, para bater o olho e saber se vem alguma mudança (operação especial em
-eleição e ENEM, obras, feriado). Nem o site do Metrofor nem o do Governo do
-Ceará têm RSS ou API, então as manchetes vêm da busca RSS do Google Notícias
-(`metrofor OR "metrô de fortaleza" OR "VLT" Ceará`), limitada aos últimos 30
-dias. A lista fica guardada no aparelho e é baixada de novo ao abrir o app se
-tiver mais de 3 horas, ou pelo botão de atualizar. Não é uma API oficial: se
-ela falhar, a lista antiga continua na tela.
+Um ícone de **informação** no topo abre a tela **Sobre**: o aviso de que o app
+não é oficial, de onde vêm os dados, a licença, o link do código-fonte e uma
+chave Pix para quem quiser apoiar o projeto (`PIX_KEY` em `ui/AboutScreen.kt`;
+vazia, a seção de doação some).
 
 ## Horários do dia
 

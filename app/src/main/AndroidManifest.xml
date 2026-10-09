@@ -6,7 +6,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
-    <!-- So para sincronizar as manchetes de noticias; horarios seguem offline. -->
+    <!-- Para baixar os horarios do dia do Metrofor (GTFS). -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <!-- Modo viagem: segue o GPS com a tela desligada e avisa antes do destino. -->

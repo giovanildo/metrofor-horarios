@@ -42,8 +42,6 @@ import androidx.compose.ui.unit.dp
 import io.github.giova.metrofortaleza.data.BIKE_NEAR_YOU_MAX_METERS
 import io.github.giova.metrofortaleza.data.LocationSource
 import io.github.giova.metrofortaleza.data.MetroforDatabase
-import io.github.giova.metrofortaleza.data.NewsCache
-import io.github.giova.metrofortaleza.data.NewsFeed
 import io.github.giova.metrofortaleza.data.PinnedStation
 import io.github.giova.metrofortaleza.data.ScheduleRepository
 import io.github.giova.metrofortaleza.data.ScheduleSource
@@ -76,8 +74,6 @@ private fun formatKm(meters: Double): String =
 /** Quem inicia a viagem já dentro do trem ainda pega a partida de até 2 min atrás. */
 private const val TRIP_LATE_BOARDING_MINUTES = 2
 
-/** Manchetes mais velhas que isso são baixadas de novo ao abrir o app. */
-private const val NEWS_STALE_MILLIS = 3L * 60 * 60 * 1000
 
 @Composable
 fun AppRoot() {
@@ -119,6 +115,7 @@ fun AppRoot() {
     // Guardamos apenas os ids para a navegação sobreviver à rotação de tela.
     var routeId by rememberSaveable { mutableStateOf<String?>(null) }
     var stopId by rememberSaveable { mutableStateOf<String?>(null) }
+    var showAbout by rememberSaveable { mutableStateOf(false) }
 
     val routes = remember(repo) { repo.routes() }
     val bikeStations = remember(repo) { repo.bikeStations() }
@@ -395,31 +392,6 @@ fun AppRoot() {
         }
     }
 
-    // ------------------------------------------------------------ notícias --
-    val newsCache = remember(context) { NewsCache(context) }
-    var headlines by remember { mutableStateOf(newsCache.load()) }
-    var newsSyncedAt by remember { mutableStateOf(newsCache.syncedAt) }
-    var newsSyncing by remember { mutableStateOf(false) }
-
-    fun syncNews() {
-        if (newsSyncing) return
-        newsSyncing = true
-        scope.launch {
-            // Sem rede ou com o feed fora do ar, fica a lista antiga.
-            withContext(Dispatchers.IO) { runCatching { NewsFeed.fetch() } }
-                .onSuccess {
-                    newsCache.save(it)
-                    headlines = it
-                    newsSyncedAt = newsCache.syncedAt
-                }
-            newsSyncing = false
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        if (System.currentTimeMillis() - newsCache.syncedAt > NEWS_STALE_MILLIS) syncNews()
-    }
-
     fun openStation(station: Station) {
         routeId = station.routeId
         stopId = station.stopId
@@ -427,6 +399,11 @@ fun AppRoot() {
 
     // --------------------------------------------------------------- telas ----
     when {
+        showAbout -> {
+            BackHandler { showAbout = false }
+            AboutScreen(onBack = { showAbout = false })
+        }
+
         route != null && stop != null -> {
             val directions = remember(route.id) { repo.directions(route.id) }
             val isPinned = pinned.get() == (stop.id to route.id)
@@ -481,6 +458,7 @@ fun AppRoot() {
             routes = routes,
             stationCount = { repo.stationCount(it.id) },
             onRouteClick = { routeId = it.id },
+            onAbout = { showAbout = true },
             header = {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     val trip = activeTrip
@@ -538,12 +516,6 @@ fun AppRoot() {
                         }
                     }
                     homeBike?.let { HomeBikeCard(it) }
-                    NewsCard(
-                        headlines = headlines,
-                        syncedAt = newsSyncedAt,
-                        syncing = newsSyncing,
-                        onRefresh = ::syncNews,
-                    )
                 }
             },
         )
