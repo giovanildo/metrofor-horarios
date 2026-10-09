@@ -84,7 +84,7 @@ def load_bike_stations():
     """
     print(f"baixando {BIKE_URL}")
     try:
-        req = urllib.request.Request(BIKE_URL, headers={"User-Agent": "metrofor-horarios/1.0"})
+        req = urllib.request.Request(BIKE_URL, headers={"User-Agent": "metro-fortaleza-horarios/1.0"})
         with urllib.request.urlopen(req, timeout=60) as resp:
             data = json.load(resp)
     except Exception as exc:  # noqa: BLE001 - qualquer falha de rede serve
@@ -122,7 +122,7 @@ def load_feed(source):
     ctx = ssl.create_default_context()
     ctx.check_hostname = False
     ctx.verify_mode = ssl.CERT_NONE
-    req = urllib.request.Request(FEED_URL, headers={"User-Agent": "metrofor-horarios/1.0"})
+    req = urllib.request.Request(FEED_URL, headers={"User-Agent": "metro-fortaleza-horarios/1.0"})
     with urllib.request.urlopen(req, context=ctx, timeout=60) as resp:
         return zipfile.ZipFile(io.BytesIO(resp.read()))
 

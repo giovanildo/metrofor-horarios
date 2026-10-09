@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Metrô Fortaleza</string>
-    <string name="subtitle">Horários das linhas do Metrofor</string>
+    <string name="subtitle">Horários de metrô e VLT · app não oficial</string>
     <string name="unofficial">App não oficial. Dados do GTFS público do Metrofor.</string>
     <string name="back">Voltar</string>
     <string name="next_departures">Próximas partidas</string>

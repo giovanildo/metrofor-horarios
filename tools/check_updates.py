@@ -41,7 +41,7 @@ def fetch(url, insecure=False):
         context = ssl.create_default_context()
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
-    request = urllib.request.Request(url, headers={"User-Agent": "metrofor-horarios/1.0"})
+    request = urllib.request.Request(url, headers={"User-Agent": "metro-fortaleza-horarios/1.0"})
     with urllib.request.urlopen(request, context=context, timeout=90) as response:
         return response.read()
 

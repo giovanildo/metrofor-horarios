@@ -228,8 +228,8 @@ Estas vêm do feed oficial, não do app:
    [publicado à parte](https://dados.fortaleza.ce.gov.br/dataset/?tags=gtfs).
 7. O domínio `metrofor.ce.gov.br` está com **certificado HTTPS expirado** e
    redireciona para `ce.gov.br/metrofor`. Por isso o gerador desliga a
-   verificação de certificado — e por isso o app nunca fala com o servidor do
-   Metrofor: quem baixa o feed é você, na sua máquina.
+   verificação de certificado, e o app aceita qualquer certificado **só** na
+   conexão com `info.metrofor.ce.gov.br` (veja [Horários do dia](#horários-do-dia)).
 
 ## Build
 
@@ -242,7 +242,7 @@ bash tools/setup-dev.sh
 O script instala **JDK 21**, **Gradle 9.8** e o **Android SDK 37** dentro do seu
 diretório de usuário (`~/.local/opt` e `~/Android/Sdk`), sem usar `sudo` e sem
 tocar no sistema, confere o checksum de cada download, gera o
-`gradle-wrapper.jar` — que não está versionado aqui — e compila o APK de debug
+`gradle-wrapper.jar` e compila o APK de debug
 em `app/build/outputs/apk/debug/`.
 
 Ele é idempotente: se você já tiver um JDK 21 (por exemplo via
@@ -277,6 +277,30 @@ em 36 de propósito: subir o `targetSdk` muda comportamento em tempo de
 execução, e o app ainda não foi testado em aparelho. É a origem do único aviso
 de lint que sobrou.
 
+## Publicação no F-Droid
+
+O app vai ser distribuído pelo [F-Droid](https://f-droid.org), que compila a
+partir deste repositório. O que já está pronto aqui:
+
+- **Textos e imagens da loja** em `fastlane/metadata/android/pt-BR/`: título,
+  descrições, ícone, capturas de tela e `changelogs/<versionCode>.txt`.
+- **A receita** em `fdroid/io.github.giova.metrofortaleza.yml`, para copiar
+  para `metadata/` no [fdroiddata](https://gitlab.com/fdroid/fdroiddata).
+- **Uma tag por versão** (`v1.7`, …): com `UpdateCheckMode: Tags`, o F-Droid
+  acha versões novas sozinho.
+
+Para cada versão nova: subir `versionCode`/`versionName`, escrever
+`changelogs/<versionCode>.txt`, criar a tag `vX.Y` e dar push com `--tags`.
+
+Para o primeiro envio, alguém com conta no GitLab faz um fork do fdroiddata,
+copia a receita e abre um *merge request* (o guia é
+[Submitting to F-Droid](https://f-droid.org/docs/Submitting_to_F-Droid_Quick_Start_Guide/)).
+Duas coisas para explicar no pedido: o `app/src/main/assets/metrofor.db` é
+**dado**, não código — é gerado por `tools/build_db.py` a partir do GTFS público
+e serve só de reserva, porque o app baixa os horários do dia sozinho; e o
+build usa AGP 9 com `compileSdk` 37, que o servidor de build do F-Droid precisa
+suportar.
+
 ## Licença
 
 Copyright (C) 2026 Giovanildo
@@ -303,5 +327,15 @@ próprios termos:
 - **Estações do Bicicletar** — GeoJSON publicado pela AMC no
   [portal de dados abertos da Prefeitura de Fortaleza](https://dados.fortaleza.ce.gov.br/organization/amc).
 
-Este é um app **não oficial**, sem vínculo com o Metrofor, a AMC ou a
-Prefeitura de Fortaleza.
+Este é um app **não oficial**, sem vínculo com o Metrofor, a AMC, a Prefeitura
+de Fortaleza ou o Governo do Ceará.
+
+### Sobre o nome e a marca
+
+"Metrofor" é o nome da Companhia Cearense de Transportes Metropolitanos. O app
+cita o nome **só para dizer de onde vêm os dados** (uso nominativo): ele se
+chama "Metrô Fortaleza", não usa "Metrofor" no nome nem no ícone, não reproduz
+o logotipo, e traz o aviso de não oficial na tela inicial e na tela Sobre. As
+cores das linhas vêm do próprio GTFS e servem só para identificá-las. Quem for
+publicar o app em loja deve manter esses cuidados — nome, ícone e descrição sem
+sugerir vínculo oficial.

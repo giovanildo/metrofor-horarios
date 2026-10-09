@@ -127,7 +127,7 @@ object ScheduleStore {
         connection.hostnameVerifier = HostnameVerifier { host, _ -> host == FEED_HOST }
         connection.connectTimeout = 20_000
         connection.readTimeout = 30_000
-        connection.setRequestProperty("User-Agent", "metrofor-horarios/1.0")
+        connection.setRequestProperty("User-Agent", "metro-fortaleza-horarios/1.0")
         return try {
             check(connection.responseCode == 200) { "HTTP ${connection.responseCode}" }
             connection.inputStream.use { it.readBytes() }

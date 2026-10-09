@@ -39,7 +39,7 @@ import io.github.giova.metrofortaleza.R
 /** Chave Pix para doações. Vazia = a seção de doação não aparece. */
 private const val PIX_KEY = "giovanildos@gmail.com"
 
-private const val REPO_URL = "https://github.com/giovanildo/metrofor-horarios"
+private const val REPO_URL = "https://github.com/giovanildo/metro-fortaleza-horarios"
 
 /** Sobre o app: aviso de não oficial, fontes dos dados, licença e doação. */
 @OptIn(ExperimentalMaterial3Api::class)
