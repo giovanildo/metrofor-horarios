@@ -13,8 +13,13 @@ caso, com a grade que vem no APK.
 se o Play Protect avisar "app não verificado", toque em *Mais detalhes →
 Instalar mesmo assim*. Para atualizar sozinho, use o
 [Obtainium](https://github.com/ImranR98/Obtainium) com o endereço deste
-repositório. Para divulgar, há uma imagem de story com QR code em
-[`divulgacao/`](divulgacao/).
+repositório.
+
+Para divulgar, há imagens de story (1080×1920) em [`divulgacao/`](divulgacao/):
+`story-qrcode.png`, só com o QR code, e `story-qrcode-link.png`, com o QR e o
+link escrito e um espaço livre embaixo para a figurinha de link do Instagram. O
+QR leva a `releases/latest`. Imagem não tem link clicável: no Instagram use a
+figurinha "Link"; no status do WhatsApp, poste o link num status de texto.
 
 A tela inicial destaca uma estação com a próxima partida de cada sentido. Pelo
 GPS, se houver estações de **outras linhas a até 3 km**, cada linha ganha seu
