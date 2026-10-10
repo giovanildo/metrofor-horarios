@@ -74,6 +74,6 @@ data class TransferTarget(
     val routeName: String,
     val routeColor: String,
     val direction: Direction,
-    /** Se trocar de linha aqui exige nova passagem. */
-    val fare: TransferFare = TransferFare.UNKNOWN,
+    /** Se trocar de linha aqui, neste sentido, exige nova passagem. */
+    val fare: TransferRule = TransferRule(TransferFare.UNKNOWN),
 )

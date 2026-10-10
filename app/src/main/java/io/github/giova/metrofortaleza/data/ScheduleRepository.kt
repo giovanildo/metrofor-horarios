@@ -140,7 +140,7 @@ class ScheduleRepository(context: Context) {
             routeName = it.getString(4),
             routeColor = it.getString(5),
             direction = Direction(it.getInt(6), it.getString(7)),
-            fare = transferFare(it.getString(8), it.getString(1)),
+            fare = transferRule(it.getString(8), it.getString(1)),
         )
     }
 

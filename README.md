@@ -73,11 +73,19 @@ banco (`TRANSFERS` em `tools/build_db.py` e `GtfsImporter.kt`):
 | Expedicionários ↔ Expedicionários - AE | Nordeste ↔ VLT Aeroporto | 3 min |
 | Chico da Silva ↔ Moura Brasil | Sul ↔ Oeste | 5 min (~200 m) |
 
-**Passagem.** Se a integração é paga ou gratuita fica em
-`data/TransferFares.kt` (`FREE`, `PAID` ou `UNKNOWN`), fixo no código porque
-não vem do GTFS. Com `UNKNOWN` o app não diz nada sobre passagem, para não
-informar errado; com os outros, mostra "Integração gratuita" ou "Integração
-paga" no bloco.
+**Passagem.** A regra fica em `data/TransferFares.kt`, fixa no código porque não
+vem do GTFS, e vale **por sentido** (de → para), com um motivo opcional:
+
+| De → Para | Passagem |
+|---|---|
+| Chico da Silva → Moura Brasil (Sul → Oeste) | paga |
+| Moura Brasil → Chico da Silva (Oeste → Sul) | paga |
+| Parangaba → Parangaba - NE (Sul → Nordeste) | **gratuita** — a Linha Nordeste está gratuita durante a implantação |
+| Parangaba - NE → Parangaba (Nordeste → Sul) | paga — entrar na estação da Linha Sul cobra |
+| Expedicionários ↔ Expedicionários - AE (Nordeste ↔ VLT Aeroporto) | não informada |
+
+Sem regra (`UNKNOWN`) o app não fala de passagem, para não informar errado.
+Quando a Nordeste começar a cobrar, basta trocar a entrada que cita o motivo.
 
 ### Modo viagem
 

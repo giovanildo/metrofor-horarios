@@ -93,16 +93,18 @@ fun TransferBlock(
                     )
                 }
                 // Passagem: só falamos quando a regra está confirmada.
-                when (first.fare) {
+                when (first.fare.fare) {
                     TransferFare.FREE -> Text(
-                        text = stringResource(R.string.transfer_free),
+                        text = stringResource(R.string.transfer_free) +
+                            (first.fare.reason?.let { " ($it)" } ?: ""),
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(top = 4.dp),
                     )
                     TransferFare.PAID -> Text(
-                        text = stringResource(R.string.transfer_paid),
+                        text = stringResource(R.string.transfer_paid) +
+                            (first.fare.reason?.let { " ($it)" } ?: ""),
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.error,
