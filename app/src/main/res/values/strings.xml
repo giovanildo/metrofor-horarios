@@ -89,7 +89,8 @@
     <string name="trip_far_warning">Você está a %1$s de %2$s. Até o GPS te encontrar na linha, a posição vai sair só da tabela de horários. Iniciar mesmo assim?</string>
     <string name="trip_far_start">Iniciar mesmo assim</string>
     <string name="trip_too_far">Você está a %1$s de %2$s. O modo viagem só fica disponível a até %3$s da estação de partida.</string>
-    <string name="trip_gps_lost">Sem GPS há %1$d min: a posição é presumida pela tabela de horários, corrigida pelo último atraso medido. Confira o nome das estações pela janela.</string>
+    <string name="trip_gps_lost_title">Sem GPS há %1$d min</string>
+    <string name="trip_gps_lost_body">Posição estimada pela tabela de horários. Confira o nome das estações pela janela.</string>
     <string name="trip_gps_lost_short">sem GPS há %1$d min</string>
     <string name="trip_presumed_prefix">Pela tabela de horários</string>
     <string name="trip_station_presumed">Provavelmente %1$s</string>

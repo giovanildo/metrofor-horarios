@@ -104,8 +104,10 @@ primeiro plano, com notificação fixa, segue a viagem com a tela desligada:
   por esse atraso. A tela diz qual das duas fontes está valendo.
 - **Quando o GPS é dado como perdido.** Depois de **1 minuto** sem nenhuma
   posição boa (12 tentativas, uma a cada 5 s) — menos que os ~2 min entre duas
-  estações. A partir daí o cartão mostra em vermelho "Sem GPS há N min: a
-  posição é presumida pela tabela de horários…", a notificação fixa ganha
+  estações. A partir daí o cartão mostra um quadro em destaque, de fundo neutro
+  e letra legível (ícone vermelho só para chamar atenção): "**Sem GPS há N
+  min** — Posição estimada pela tabela de horários. Confira o nome das
+  estações pela janela." A notificação fixa ganha
   "sem GPS há N min", e todo aviso baseado na tabela diz isso: a estação vira
   "Provavelmente Parangaba" e o aviso de descida começa com "Pela tabela de
   horários". A tabela é a "média" da viagem: os horários programados do

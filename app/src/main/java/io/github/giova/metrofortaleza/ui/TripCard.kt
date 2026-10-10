@@ -1,6 +1,9 @@
 package io.github.giova.metrofortaleza.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -126,21 +129,37 @@ fun TripCard(
             )
             progress.gpsSilentMinutes?.let { silent ->
                 if (!trip.arrived) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(top = 8.dp),
+                    // Quadro próprio, de fundo neutro: texto vermelho pequeno sobre o
+                    // fundo do cartão ficava difícil de ler, justo quando importa.
+                    Surface(
+                        color = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.onSurface,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
                     ) {
-                        Icon(
-                            Icons.Filled.GpsOff,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.error,
-                        )
-                        Text(
-                            text = stringResource(R.string.trip_gps_lost, silent.toInt().coerceAtLeast(1)),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.padding(start = 8.dp),
-                        )
+                        Row(
+                            verticalAlignment = Alignment.Top,
+                            modifier = Modifier.padding(12.dp),
+                        ) {
+                            Icon(
+                                Icons.Filled.GpsOff,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(24.dp),
+                            )
+                            Column(modifier = Modifier.padding(start = 12.dp)) {
+                                Text(
+                                    text = stringResource(R.string.trip_gps_lost_title, silent.toInt().coerceAtLeast(1)),
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                                Text(
+                                    text = stringResource(R.string.trip_gps_lost_body),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    modifier = Modifier.padding(top = 2.dp),
+                                )
+                            }
+                        }
                     }
                 }
             }
