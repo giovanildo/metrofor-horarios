@@ -32,35 +32,39 @@ class LocationSource(private val context: Context) {
 
     /**
      * A melhor posição que der para obter, ou `null` se não houver permissão,
-     * provedor ativo, ou se nada chegar dentro de [timeoutMillis].
+     * provedor ativo, nem posição guardada recente.
+     *
+     * Pede a todos os provedores ao mesmo tempo — o do Google ("fused", o mesmo
+     * do Maps), a rede (Wi-Fi/antenas) e o GPS — e fica com a primeira posição
+     * boa. Pedir só ao GPS fazia o botão falhar em quem acabou de instalar: sem
+     * posição guardada, o GPS frio não acha satélites em poucos segundos dentro
+     * de casa ou do trem, e só abrir o Maps (que usa o "fused") destravava.
      */
     @SuppressLint("MissingPermission") // hasPermission() barra o caminho antes
-    suspend fun current(timeoutMillis: Long = 10_000): Location? {
+    suspend fun current(timeoutMillis: Long = 30_000): Location? {
         if (!hasPermission()) return null
         val manager = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
             ?: return null
         val providers = runCatching { manager.getProviders(true) }.getOrNull().orEmpty()
-        if (providers.isEmpty()) return null
 
-        // Uma posição recente já serve e é instantânea; só pedimos uma nova se
-        // não houver nada fresco em cache.
-        val cutoff = System.currentTimeMillis() - MAX_AGE_MILLIS
-        providers
-            .mapNotNull { runCatching { manager.getLastKnownLocation(it) }.getOrNull() }
-            .filter { it.time >= cutoff }
+        // Uma posição recente já serve e é instantânea.
+        val cached = providers.mapNotNull { runCatching { manager.getLastKnownLocation(it) }.getOrNull() }
+        val now = System.currentTimeMillis()
+        cached.filter { it.time >= now - MAX_AGE_MILLIS }
             .minByOrNull { it.accuracy }
             ?.let { return it }
 
-        val provider = providers.firstOrNull { it == LocationManager.GPS_PROVIDER }
-            ?: providers.firstOrNull { it == LocationManager.NETWORK_PROVIDER }
-            ?: providers.first()
-
-        return withTimeoutOrNull(timeoutMillis) {
+        var best: Location? = null
+        val fresh = withTimeoutOrNull(timeoutMillis) {
             suspendCancellableCoroutine { continuation ->
                 val listener = object : LocationListener {
                     override fun onLocationChanged(location: Location) {
-                        manager.removeUpdates(this)
-                        if (continuation.isActive) continuation.resume(location)
+                        if (best.let { it == null || location.accuracy < it.accuracy }) best = location
+                        // As estações ficam a mais de 1 km umas das outras: 500 m já acerta.
+                        if (location.accuracy <= GOOD_ENOUGH_METERS) {
+                            manager.removeUpdates(this)
+                            if (continuation.isActive) continuation.resume(location)
+                        }
                     }
 
                     // Depreciado, mas continua abstrato nos aparelhos anteriores
@@ -71,14 +75,19 @@ class LocationSource(private val context: Context) {
                     override fun onProviderEnabled(provider: String) = Unit
                     override fun onProviderDisabled(provider: String) = Unit
                 }
-                runCatching {
-                    manager.requestLocationUpdates(provider, 0L, 0f, listener, Looper.getMainLooper())
-                }.onFailure {
-                    if (continuation.isActive) continuation.resume(null)
+                val asked = providers.filter { it in WANTED_PROVIDERS }.count { provider ->
+                    runCatching {
+                        manager.requestLocationUpdates(provider, 0L, 0f, listener, Looper.getMainLooper())
+                    }.isSuccess
                 }
+                if (asked == 0 && continuation.isActive) continuation.resume(null)
                 continuation.invokeOnCancellation { manager.removeUpdates(listener) }
             }
         }
+        // Nada bom a tempo: a melhor que chegou, ou a última guardada de até 30 min.
+        return fresh ?: best ?: cached
+            .filter { it.time >= now - FALLBACK_AGE_MILLIS }
+            .maxByOrNull { it.time }
     }
 
     /** A posição mais precisa já guardada no aparelho, de até [maxAgeMillis] atrás. Não liga o GPS. */
@@ -116,7 +125,7 @@ class LocationSource(private val context: Context) {
             override fun onProviderDisabled(provider: String) = Unit
         }
         val providers = runCatching { manager.getProviders(true) }.getOrNull().orEmpty()
-            .filter { it == LocationManager.GPS_PROVIDER || it == LocationManager.NETWORK_PROVIDER }
+            .filter { it in WANTED_PROVIDERS }
         providers.forEach { provider ->
             runCatching {
                 manager.requestLocationUpdates(provider, intervalMillis, minMeters, listener, Looper.getMainLooper())
@@ -131,5 +140,10 @@ class LocationSource(private val context: Context) {
             Manifest.permission.ACCESS_COARSE_LOCATION,
         )
         private const val MAX_AGE_MILLIS = 60 * 1000L
+        private const val FALLBACK_AGE_MILLIS = 30 * 60 * 1000L
+        private const val GOOD_ENOUGH_METERS = 500f
+
+        /** "fused" é o provedor do Google (o do Maps); só existe em aparelhos com ele. */
+        private val WANTED_PROVIDERS = setOf("fused", LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER)
     }
 }

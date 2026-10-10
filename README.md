@@ -46,6 +46,14 @@ Sem permissão e sem estação fixada, o app continua inteiro: o cartão vira um
 convite e o resto funciona igual.
 
 A localização usa o `LocationManager` do próprio Android, sem Play Services.
+Para achar a posição, o app pede **ao mesmo tempo** ao provedor do Google
+(`fused`, o mesmo do Maps, quando o aparelho tem), à rede (Wi-Fi e antenas) e
+ao GPS, e fica com a primeira posição boa (até 500 m de erro), esperando até
+30 s; sem nada a tempo, usa a última posição guardada de até 30 min. Pedir só
+ao GPS fazia a primeira localização falhar em quem acabou de instalar o app —
+GPS frio não acha satélites em segundos dentro de casa ou do trem — e só abrir o
+Maps destravava. Se mesmo assim falhar, o app continua escutando enquanto a
+tela está aberta, e a estação aparece sozinha quando a posição chegar.
 Com a tela inicial aberta e a estação vindo do GPS, o app segue a posição
 continuamente (a cada 10 s ou 30 m): ao descer em outra estação, o destaque
 muda sozinho. Uma estação fixada pela estrela continua tendo prioridade.

@@ -201,7 +201,10 @@ fun AppRoot() {
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
-    val followGps = visible && homeState is HomeStation.Nearby
+    // Também depois de uma falha: o GPS frio pode achar satélites só depois de
+    // um tempo, e aí a estação aparece sozinha, sem a pessoa tocar em nada.
+    val gpsFailed = (homeState as? HomeStation.Unavailable)?.reason == HomeStation.Reason.NO_FIX
+    val followGps = visible && (homeState is HomeStation.Nearby || gpsFailed) && locationSource.hasPermission()
     LaunchedEffect(followGps, repo, settings) {
         if (!followGps) return@LaunchedEffect
         val stations = withContext(Dispatchers.IO) { repo.stations() }
