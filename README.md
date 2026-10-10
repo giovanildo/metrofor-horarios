@@ -8,6 +8,10 @@ caso, com a grade que vem no APK.
 
 ## Baixar
 
+**Página do app, para divulgar:** <https://giovanildo.github.io/metro-fortaleza-horarios/>
+— explica o que o app faz e como instalar, para quem não é programador, e gera
+uma prévia bonita ao colar o link no WhatsApp.
+
 **[⬇ Baixar a última versão (APK)](https://github.com/giovanildo/metro-fortaleza-horarios/releases/latest)**
 — Android 7 ou mais novo. Ao abrir o arquivo, permita instalar apps dessa fonte;
 se o Play Protect avisar "app não verificado", toque em *Mais detalhes →
