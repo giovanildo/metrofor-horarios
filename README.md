@@ -170,6 +170,11 @@ Um ícone de **engrenagem** no topo abre as **Configurações**, com as distânc
 e os tempos que antes eram fixos no código (`data/Settings.kt`; padrões entre
 parênteses):
 
+Na seção **Aparência**: **Tema** — "Como o celular" (padrão), "Claro" ou
+"Escuro"; os ícones da barra de status acompanham o tema do app — e **Cores do
+papel de parede** (Android 12+, ligado por padrão; desligado, o app usa as
+próprias cores, em vermelho). Nas outras seções:
+
 | Ajuste | Padrão | Faixa |
 |---|---|---|
 | Mostrar outras linhas até | 3 km | 500 m – 5 km |

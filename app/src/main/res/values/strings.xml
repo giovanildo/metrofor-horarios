@@ -147,4 +147,11 @@
     <string name="trip_via_terminal">indo sentado, pelo terminal %1$s</string>
     <string name="trip_turnaround_title">%1$s: fique no %2$s</string>
     <string name="trip_turnaround_text">Ele volta às %1$s no sentido %2$s.</string>
+    <string name="settings_section_appearance">Aparência</string>
+    <string name="settings_theme">Tema</string>
+    <string name="settings_theme_auto">Como o celular</string>
+    <string name="settings_theme_light">Claro</string>
+    <string name="settings_theme_dark">Escuro</string>
+    <string name="settings_wallpaper">Cores do papel de parede</string>
+    <string name="settings_wallpaper_desc">Usa as cores do seu papel de parede. Desligado, o app usa as próprias cores, em vermelho.</string>
 </resources>

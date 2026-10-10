@@ -29,12 +29,14 @@ private val DarkColors = darkColorScheme(
 @Composable
 fun MetroFortalezaTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    wallpaperColors: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
     val colors = when {
-        // Cor dinâmica a partir do papel de parede, quando o sistema oferece.
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
+        // Cor dinâmica a partir do papel de parede, quando o sistema oferece e
+        // a pessoa não desligou nas configurações.
+        wallpaperColors && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
 
         darkTheme -> DarkColors

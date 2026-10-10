@@ -36,7 +36,17 @@ data class AppSettings(
      * voltar sentado. 0 = não oferecer.
      */
     val seatedMaxStations: Int = 3,
-)
+    /** Tema: [THEME_AUTO] (como o celular), [THEME_LIGHT] ou [THEME_DARK]. */
+    val themeMode: Int = THEME_AUTO,
+    /** Cores tiradas do papel de parede (Android 12+), em vez das cores do app. */
+    val wallpaperColors: Boolean = true,
+) {
+    companion object {
+        const val THEME_AUTO = 0
+        const val THEME_LIGHT = 1
+        const val THEME_DARK = 2
+    }
+}
 
 /** Guarda as [AppSettings] no aparelho e avisa a interface quando mudam. */
 object SettingsStore {
@@ -63,6 +73,8 @@ object SettingsStore {
             putInt("late_boarding_min", settings.lateBoardingMinutes)
             putInt("trip_give_up_min", settings.tripGiveUpMinutes)
             putInt("seated_max_stations", settings.seatedMaxStations)
+            putInt("theme_mode", settings.themeMode)
+            putBoolean("wallpaper_colors", settings.wallpaperColors)
         }
         state.value = settings
     }
@@ -87,6 +99,8 @@ object SettingsStore {
             lateBoardingMinutes = p.getInt("late_boarding_min", d.lateBoardingMinutes),
             tripGiveUpMinutes = p.getInt("trip_give_up_min", d.tripGiveUpMinutes),
             seatedMaxStations = p.getInt("seated_max_stations", d.seatedMaxStations),
+            themeMode = p.getInt("theme_mode", d.themeMode),
+            wallpaperColors = p.getBoolean("wallpaper_colors", d.wallpaperColors),
         )
     }
 

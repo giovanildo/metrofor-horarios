@@ -1,6 +1,9 @@
 package io.github.giova.metrofortaleza.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.material3.Switch
+import androidx.compose.material3.FilterChip
+import android.os.Build
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -59,6 +62,49 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
         ) {
+            SectionTitle(R.string.settings_section_appearance)
+            Text(
+                text = stringResource(R.string.settings_theme),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(top = 8.dp),
+            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(top = 8.dp),
+            ) {
+                listOf(
+                    AppSettings.THEME_AUTO to R.string.settings_theme_auto,
+                    AppSettings.THEME_LIGHT to R.string.settings_theme_light,
+                    AppSettings.THEME_DARK to R.string.settings_theme_dark,
+                ).forEach { (mode, label) ->
+                    FilterChip(
+                        selected = settings.themeMode == mode,
+                        onClick = { onChange(settings.copy(themeMode = mode)) },
+                        label = { Text(stringResource(label)) },
+                    )
+                }
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(stringResource(R.string.settings_wallpaper), style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            text = stringResource(R.string.settings_wallpaper_desc),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Switch(
+                        checked = settings.wallpaperColors,
+                        onCheckedChange = { onChange(settings.copy(wallpaperColors = it)) },
+                    )
+                }
+            }
+            HorizontalDivider(modifier = Modifier.padding(top = 12.dp))
+
             SectionTitle(R.string.settings_section_distances)
             SettingSlider(
                 title = R.string.settings_nearby_lines,
