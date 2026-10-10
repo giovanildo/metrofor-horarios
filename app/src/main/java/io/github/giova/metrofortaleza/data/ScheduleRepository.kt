@@ -144,6 +144,19 @@ class ScheduleRepository(context: Context) {
         )
     }
 
+    /**
+     * Se o sentido termina nesta estação (ela é o terminal dele): ali o
+     * "sentido" só tem chegadas, nenhuma partida que sirva a quem embarca.
+     */
+    fun endsAt(stopId: String, routeId: String, directionId: Int): Boolean = db.rawQuery(
+        """
+        SELECT stop_id FROM route_stop
+        WHERE route_id = ? AND direction_id = ?
+        ORDER BY seq DESC LIMIT 1
+        """.trimIndent(),
+        arrayOf(routeId, directionId.toString()),
+    ).map { it.getString(0) }.firstOrNull() == stopId
+
     /** Todas as combinações estação/linha, para a busca da mais próxima. */
     fun stations(): List<Station> = db.rawQuery(
         """

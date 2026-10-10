@@ -395,8 +395,9 @@ fun AppRoot() {
         )
     }
 
+    // Nos terminais, o sentido que termina ali só tem chegadas: fica de fora.
     fun departuresAt(station: Station): List<HomeDeparture> =
-        repo.directions(station.routeId).map { direction ->
+        repo.directions(station.routeId).filterNot { repo.endsAt(station.stopId, station.routeId, it.id) }.map { direction ->
             HomeDeparture(
                 headsign = direction.headsign,
                 departure = nextDepartures(
@@ -493,7 +494,9 @@ fun AppRoot() {
                     routeId = target.routeId
                     stopId = target.stopId
                 },
-                initialDirectionId = openDirectionId,
+                // Pedido por uma integração, ou o primeiro sentido em que dá para partir.
+                initialDirectionId = openDirectionId
+                    ?: directions.firstOrNull { !repo.endsAt(stop.id, route.id, it.id) }?.id,
                 tripAllowed = remember(stop.id, route.id, homeState) {
                     repo.station(stop.id, route.id)?.let { tripAllowedFrom(it.lat, it.lon) } ?: true
                 },
