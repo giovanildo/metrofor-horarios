@@ -123,8 +123,12 @@ fun DeparturesScreen(
         )
     }
     // No domingo especial a regra de bike é desconhecida: melhor calar.
-    val bikeRule = remember(route.id, now) {
-        if (!sunday && route.id in BIKE_BOARDING_ROUTE_IDS) bikeBoarding(nowDayOfWeek(), now) else null
+    // Sem mais partidas hoje nesta estação (em nenhum sentido), não há o que embarcar.
+    val runningToday = remember(directions, now) {
+        directions.any { d -> departuresFor(d).any { it >= now } }
+    }
+    val bikeRule = remember(route.id, now, runningToday) {
+        if (!sunday && runningToday && route.id in BIKE_BOARDING_ROUTE_IDS) bikeBoarding(nowDayOfWeek(), now) else null
     }
 
     Scaffold(

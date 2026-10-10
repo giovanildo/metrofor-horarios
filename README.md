@@ -154,7 +154,8 @@ também offline):
   acima de 600 m, porque a essa distância deixa de ajudar.
 
 Nas linhas Sul, Oeste e Nordeste, o app diz também **se dá para embarcar com
-bicicleta no trem agora**, na tela de partidas e no cartão da tela inicial. As
+bicicleta agora** (no metrô ou no VLT, conforme a linha; o aviso some quando
+não há mais partidas no dia), na tela de partidas e no cartão da tela inicial. As
 janelas vêm do regulamento
 [*Bike é bem-vinda no metrô*](https://www.ce.gov.br/metrofor/wp-content/uploads/sites/75/2023/03/Regula_Bikes_2023.pdf)
 (Metrofor, 2023): segunda a sexta das 9h às 15h e a partir das 20h; sábado a

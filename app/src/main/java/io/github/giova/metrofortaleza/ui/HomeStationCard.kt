@@ -205,8 +205,10 @@ private fun StationSummary(
                     )
                 }
             }
-            // No domingo especial a regra de bike é desconhecida: melhor calar.
-            if (!sunday && station.routeId in BIKE_BOARDING_ROUTE_IDS) {
+            // No domingo especial a regra de bike é desconhecida: melhor calar. E
+            // sem mais partidas hoje, "pode embarcar" não faria sentido.
+            val runningToday = departures.any { it.departure?.tomorrow == false }
+            if (!sunday && runningToday && station.routeId in BIKE_BOARDING_ROUTE_IDS) {
                 BikeBoardingNotice(
                     rule = remember(now) { bikeBoarding(nowDayOfWeek(), now) },
                     vehicle = vehicleName(station.routeName),
