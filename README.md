@@ -387,6 +387,19 @@ em 36 de propósito: subir o `targetSdk` muda comportamento em tempo de
 execução, e o app ainda não foi testado em aparelho. É a origem do único aviso
 de lint que sobrou.
 
+## Página de apresentação
+
+`docs/` é a página pública do app (GitHub Pages, publicada a partir de
+`main`/`docs`): `giovanildo.github.io/metro-fortaleza-horarios`. É um HTML só,
+sem dependências, feito para quem não é programador — o que o app faz, por que
+é seguro, como instalar (com os avisos do Android explicados) e onde baixar. Tem
+as marcações que o Google e as redes sociais leem (título, descrição, Open
+Graph com `img/previa.png` de 1200×630 para a prévia do link no WhatsApp,
+dados estruturados `SoftwareApplication`, `robots.txt` e `sitemap.xml`).
+
+As capturas em `docs/img/tela-*.jpg` são versões menores das de
+`fastlane/…/phoneScreenshots/`; ao refazer essas, refaça aquelas.
+
 ## Publicando uma versão no GitHub
 
 A release é assinada com uma chave própria, que fica **só na máquina de quem

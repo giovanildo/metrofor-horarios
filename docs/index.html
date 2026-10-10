@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Metrô Fortaleza — horários de metrô e VLT no celular (app Android)</title>
+<meta name="description" content="App Android gratuito e não oficial com os horários do metrô e do VLT de Fortaleza, Sobral e Cariri: próxima partida da estação mais perto, modo viagem que avisa antes de descer e Bicicletar. Sem anúncios.">
+<link rel="canonical" href="https://giovanildo.github.io/metro-fortaleza-horarios/">
+<link rel="icon" type="image/png" href="img/icon.png">
+<meta name="theme-color" content="#ED1C24">
+
+<!-- Prévia ao colar o link no WhatsApp, Instagram, Facebook etc. -->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="Metrô Fortaleza">
+<meta property="og:title" content="Metrô Fortaleza — horários de metrô e VLT no celular">
+<meta property="og:description" content="App Android gratuito e não oficial: próxima partida da estação mais perto, aviso antes de descer e Bicicletar. Sem anúncios.">
+<meta property="og:url" content="https://giovanildo.github.io/metro-fortaleza-horarios/">
+<meta property="og:image" content="https://giovanildo.github.io/metro-fortaleza-horarios/img/previa.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Metrô Fortaleza",
+  "operatingSystem": "Android 7+",
+  "applicationCategory": "TravelApplication",
+  "description": "Horários do metrô e do VLT de Fortaleza, Sobral e Cariri. App não oficial, gratuito e de código aberto.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "BRL" },
+  "downloadUrl": "https://github.com/giovanildo/metro-fortaleza-horarios/releases/latest",
+  "license": "https://www.gnu.org/licenses/gpl-3.0.html"
+}
+</script>
+
+<style>
+  :root {
+    --red: #ED1C24; --red-dark: #B5121A;
+    --bg: #ffffff; --text: #1d1b1e; --muted: #5a5762; --card: #f6f2f5; --line: #e6e0e6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #141217; --text: #eee9ee; --muted: #b9b2bb; --card: #221f25; --line: #34303a; }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 17px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  }
+  a { color: var(--red); }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 0 20px; }
+
+  header { background: var(--red); color: #fff; padding: 48px 0 40px; }
+  .hero { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+  .hero img { width: 104px; height: 104px; border-radius: 24px; border: 4px solid #fff; }
+  h1 { font-size: 2.3rem; line-height: 1.15; margin: 0; }
+  .tagline { font-size: 1.2rem; margin: 6px 0 0; opacity: .95; }
+  .buttons { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+  .btn {
+    display: inline-block; padding: 14px 22px; border-radius: 999px; font-weight: 700;
+    text-decoration: none; font-size: 1.05rem;
+  }
+  .btn-main { background: #fff; color: var(--red); }
+  .btn-ghost { border: 2px solid #fff; color: #fff; }
+  .small { font-size: .9rem; opacity: .9; margin-top: 12px; }
+
+  .notice {
+    background: var(--card); border-left: 5px solid var(--red); border-radius: 8px;
+    padding: 14px 18px; margin: 28px 0 0;
+  }
+  section { padding: 36px 0 8px; }
+  h2 { font-size: 1.5rem; margin: 0 0 14px; }
+  .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .feature { background: var(--card); border-radius: 16px; padding: 18px; }
+  .feature h3 { margin: 0 0 6px; font-size: 1.1rem; }
+  .feature p { margin: 0; color: var(--muted); }
+  .shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 20px; }
+  .shots figure { margin: 0; text-align: center; }
+  .shots img {
+    width: 100%; max-width: 260px; border-radius: 22px; border: 6px solid #1d1b1e;
+    box-shadow: 0 8px 24px rgba(0,0,0,.18);
+  }
+  .shots figcaption { color: var(--muted); font-size: .95rem; margin-top: 8px; }
+  ol li, ul li { margin: 6px 0; }
+  .muted { color: var(--muted); }
+  footer { border-top: 1px solid var(--line); margin-top: 40px; padding: 24px 0 40px; color: var(--muted); font-size: .95rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="hero">
+      <img src="img/icon.png" alt="Ícone do app Metrô Fortaleza">
+      <div>
+        <h1>Metrô Fortaleza</h1>
+        <p class="tagline">Horários de metrô e VLT no celular — Fortaleza, Sobral e Cariri.</p>
+      </div>
+    </div>
+    <div class="buttons">
+      <a class="btn btn-main" href="https://github.com/giovanildo/metro-fortaleza-horarios/releases/latest/download/metro-fortaleza.apk">⬇ Baixar para Android</a>
+      <a class="btn btn-ghost" href="#instalar">Como instalar</a>
+    </div>
+    <p class="small">Grátis · sem anúncios · sem cadastro · Android 7 ou mais novo</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <p class="notice"><strong>App não oficial.</strong> Feito por um passageiro, sem ligação com o Metrofor nem com o Governo do Ceará. Os horários são os que o próprio Metrofor publica.</p>
+
+  <section>
+    <h2>O que o app faz</h2>
+    <div class="features">
+      <div class="feature">
+        <h3>🚉 Próxima partida perto de você</h3>
+        <p>Pelo GPS, mostra a estação mais próxima e quando sai o próximo metrô ou VLT, em cada sentido — e as outras linhas que passam por perto.</p>
+      </div>
+      <div class="feature">
+        <h3>🔔 Modo viagem</h3>
+        <p>Escolha o destino e guarde o celular: o app avisa duas estações antes de você descer, por notificação e voz, até com a tela desligada.</p>
+      </div>
+      <div class="feature">
+        <h3>💺 Ir sentado</h3>
+        <p>Perto do terminal, o app mostra como ir até ele e voltar sentado no mesmo metrô, e quanto tempo isso custa.</p>
+      </div>
+      <div class="feature">
+        <h3>🔁 Integração entre linhas</h3>
+        <p>Em Parangaba e Chico da Silva, mostra o próximo metrô ou VLT da outra linha que ainda dá para pegar, e se a integração é paga.</p>
+      </div>
+      <div class="feature">
+        <h3>🚲 Bicicletar e bike no metrô</h3>
+        <p>A estação do Bicicletar mais perto e se dá para levar a bike no metrô agora, pelas regras do Metrofor.</p>
+      </div>
+      <div class="feature">
+        <h3>📅 Horários do dia</h3>
+        <p>Baixa a grade do próprio dia — inclusive sábado e operação especial, como em dia de eleição. Sem internet, usa a última guardada.</p>
+      </div>
+    </div>
+
+    <div class="shots">
+      <figure><img src="img/tela-1.jpg" alt="Tela inicial com as estações mais próximas" loading="lazy"><figcaption>Estações perto de você</figcaption></figure>
+      <figure><img src="img/tela-2.jpg" alt="Horários de uma estação" loading="lazy"><figcaption>Todos os horários</figcaption></figure>
+      <figure><img src="img/tela-3.jpg" alt="Modo viagem em andamento" loading="lazy"><figcaption>Modo viagem</figcaption></figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>É seguro?</h2>
+    <ul>
+      <li><strong>Código aberto</strong> (licença GPL-3.0): qualquer pessoa pode ver e conferir tudo o que o app faz, <a href="https://github.com/giovanildo/metro-fortaleza-horarios">aqui no GitHub</a>.</li>
+      <li><strong>Sem anúncios, sem cadastro, sem rastreadores.</strong></li>
+      <li><strong>Sua localização fica no celular:</strong> é usada só para achar a estação mais perto e acompanhar a viagem. Nada é enviado para ninguém.</li>
+      <li>A internet é usada só para baixar os horários publicados pelo Metrofor.</li>
+    </ul>
+    <p class="muted">O Android mostra avisos ao instalar qualquer app que não venha da Play Store. Eles são normais para apps instalados por fora da loja — veja abaixo como seguir.</p>
+  </section>
+
+  <section id="instalar">
+    <h2>Como instalar</h2>
+    <ol>
+      <li>No celular Android, toque em <a href="https://github.com/giovanildo/metro-fortaleza-horarios/releases/latest/download/metro-fortaleza.apk"><strong>Baixar para Android</strong></a>.</li>
+      <li>Abra o arquivo <strong>metro-fortaleza.apk</strong> quando o download terminar.</li>
+      <li>Se o Android pedir, permita <strong>instalar apps desta fonte</strong> (para o navegador ou o gerenciador de arquivos).</li>
+      <li>Se o Google Play Protect avisar "app não verificado", toque em <strong>Mais detalhes → Instalar mesmo assim</strong>.</li>
+      <li>Abra o app e toque em <strong>Usar minha localização</strong>.</li>
+    </ol>
+    <p class="muted">Para receber as novas versões sozinho, use o app <a href="https://github.com/ImranR98/Obtainium">Obtainium</a> com o endereço do projeto. Também dá para ver <a href="https://github.com/giovanildo/metro-fortaleza-horarios/releases">todas as versões e novidades</a>.</p>
+  </section>
+
+  <section>
+    <h2>Apoie</h2>
+    <p>O app é gratuito e feito no tempo livre. Se ele te ajuda, você pode:</p>
+    <ul>
+      <li><strong>Compartilhar</strong> este endereço com quem anda de metrô: <strong>giovanildo.github.io/metro-fortaleza-horarios</strong></li>
+      <li><strong>Doar via Pix:</strong> giovanildos@gmail.com</li>
+      <li><strong>Sugerir melhorias ou avisar de problemas</strong> <a href="https://github.com/giovanildo/metro-fortaleza-horarios/issues">por aqui</a>.</li>
+    </ul>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    Metrô Fortaleza — app <strong>não oficial</strong>, sem vínculo com o Metrofor, o Governo do Ceará ou a Prefeitura de Fortaleza.
+    Horários: GTFS público do Metrofor. Bicicletar: dados abertos da Prefeitura de Fortaleza (AMC).
+    Software livre sob a licença GPL-3.0.
+  </div>
+</footer>
+
+</body>
+</html>

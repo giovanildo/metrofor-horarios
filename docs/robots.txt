@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://giovanildo.github.io/metro-fortaleza-horarios/sitemap.xml
