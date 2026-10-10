@@ -123,6 +123,11 @@ fun SettingsScreen(
             ) { onChange(settings.copy(bikeNearStationMeters = it)) }
 
             SectionTitle(R.string.settings_section_trip)
+            SettingSwitch(
+                title = R.string.settings_belongings,
+                description = R.string.settings_belongings_desc,
+                checked = settings.remindBelongings,
+            ) { onChange(settings.copy(remindBelongings = it)) }
             SettingSlider(
                 title = R.string.settings_alert_before,
                 description = R.string.settings_alert_before_desc,
@@ -186,6 +191,25 @@ private fun SectionTitle(text: Int) {
         color = MaterialTheme.colorScheme.primary,
         modifier = Modifier.padding(top = 16.dp),
     )
+}
+
+/** Um ajuste de ligar e desligar, com explicação curta. */
+@Composable
+private fun SettingSwitch(title: Int, description: Int, checked: Boolean, onChecked: (Boolean) -> Unit) {
+    Column(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(stringResource(title), style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    text = stringResource(description),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Switch(checked = checked, onCheckedChange = onChecked, modifier = Modifier.padding(start = 12.dp))
+        }
+        HorizontalDivider(modifier = Modifier.padding(top = 12.dp))
+    }
 }
 
 /** Um ajuste: nome, explicação curta e um controle deslizante com o valor atual. */

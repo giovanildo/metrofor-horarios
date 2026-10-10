@@ -40,6 +40,8 @@ data class AppSettings(
     val themeMode: Int = THEME_AUTO,
     /** Cores tiradas do papel de parede (Android 12+), em vez das cores do app. */
     val wallpaperColors: Boolean = true,
+    /** No aviso de descida e na chegada, lembrar de não esquecer os pertences. */
+    val remindBelongings: Boolean = true,
 ) {
     companion object {
         const val THEME_AUTO = 0
@@ -75,6 +77,7 @@ object SettingsStore {
             putInt("seated_max_stations", settings.seatedMaxStations)
             putInt("theme_mode", settings.themeMode)
             putBoolean("wallpaper_colors", settings.wallpaperColors)
+            putBoolean("remind_belongings", settings.remindBelongings)
         }
         state.value = settings
     }
@@ -101,6 +104,7 @@ object SettingsStore {
             seatedMaxStations = p.getInt("seated_max_stations", d.seatedMaxStations),
             themeMode = p.getInt("theme_mode", d.themeMode),
             wallpaperColors = p.getBoolean("wallpaper_colors", d.wallpaperColors),
+            remindBelongings = p.getBoolean("remind_belongings", d.remindBelongings),
         )
     }
 

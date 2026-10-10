@@ -154,4 +154,8 @@
     <string name="settings_theme_dark">Escuro</string>
     <string name="settings_wallpaper">Cores do papel de parede</string>
     <string name="settings_wallpaper_desc">Usa as cores do seu papel de parede. Desligado, o app usa as próprias cores, em vermelho.</string>
+    <string name="trip_belongings">Não esqueça seus pertences.</string>
+    <string name="trip_arrived_belongings">Você chegou a %1$s. Confira se está levando tudo.</string>
+    <string name="settings_belongings">Lembrar dos pertences</string>
+    <string name="settings_belongings_desc">No aviso de descida e na chegada, o app lembra de não esquecer bolsa, celular e outros pertences.</string>
 </resources>

@@ -12,6 +12,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import io.github.giova.metrofortaleza.MainActivity
 import io.github.giova.metrofortaleza.R
+import io.github.giova.metrofortaleza.data.SettingsStore
 import io.github.giova.metrofortaleza.data.TripFix
 import io.github.giova.metrofortaleza.data.formatTime
 import io.github.giova.metrofortaleza.data.vehicleName
@@ -147,6 +148,24 @@ internal object TripNotifications {
         return "$title. $text"
     }
 
+    /** Na chegada, o lembrete de conferir os pertences. Devolve o texto, para a voz. */
+    fun arrivedBelongings(context: Context, trip: ActiveTrip): String {
+        val text = context.getString(R.string.trip_arrived_belongings, trip.plan.destination.name)
+        val notification = NotificationCompat.Builder(context, CHANNEL_STATION)
+            .setSmallIcon(R.drawable.ic_launcher)
+            .setContentTitle(trip.plan.destination.name)
+            .setContentText(text)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setDefaults(NotificationCompat.DEFAULT_SOUND)
+            .setAutoCancel(true)
+            .setContentIntent(openApp(context))
+            .build()
+        runCatching {
+            context.getSystemService(NotificationManager::class.java).notify(STATION_ID, notification)
+        }
+        return text
+    }
+
     /** A notificação fixa enquanto a viagem dura. */
     fun ongoing(context: Context, trip: ActiveTrip): android.app.Notification {
         val plan = trip.plan
@@ -189,6 +208,9 @@ internal object TripNotifications {
             context.resources.getQuantityString(R.plurals.trip_stations_left, left, left),
             trip.plan.destination.name,
         ).let { if (trip.progress.presumed) context.getString(R.string.trip_presumed_prefix) + ": " + it else it }
+            .let {
+                if (SettingsStore.get(context).remindBelongings) it + " " + context.getString(R.string.trip_belongings) else it
+            }
         val notification = NotificationCompat.Builder(context, if (sound) CHANNEL_ALERT_SOUND else CHANNEL_ALERT_SILENT)
             .setSmallIcon(R.drawable.ic_launcher)
             .setContentTitle(context.getString(R.string.trip_alert_title))

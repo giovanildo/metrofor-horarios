@@ -140,6 +140,10 @@ primeiro plano, com notificação fixa, segue a viagem com a tela desligada:
   pelo botão da tela de horários (antes, ali, só o sentido da aba aberta).
 - Durante a viagem, o cartão da estação em destaque some da tela inicial: o da
   viagem já diz onde a pessoa está.
+- **Lembrete dos pertences** (ligado por padrão; desliga nas Configurações): o
+  aviso de descida termina com "Não esqueça seus pertences." e, na chegada, vem
+  "Você chegou a X. Confira se está levando tudo." — por notificação e, com o
+  som ligado, por voz. Não entra no aviso de cada estação, para não virar ruído.
 - A viagem encerra sozinha ao chegar, ou 30 min depois da chegada prevista.
 - Precisa da permissão de localização (o Android não deixa o serviço rodar sem
   ela) e, no Android 13+, pede também a de notificações.

@@ -96,7 +96,14 @@ class TripService : Service() {
                     }
                     // A partida do terminal é a mesma estação: não anunciar de novo.
                     val isTerminalAgain = plan.viaTerminal && progress.index == turn + 1
-                    if (!alertedNow && !isTerminalAgain && progress.index != turn &&
+                    // Chegada com lembrete de pertences: ele já diz "você chegou".
+                    val arrivalReminder = progress.index >= plan.stops.lastIndex &&
+                        SettingsStore.get(this@TripService).remindBelongings
+                    if (arrivalReminder) {
+                        val text = TripNotifications.arrivedBelongings(this@TripService, trip.copy(progress = progress))
+                        if (TripTracker.isSoundEnabled(this@TripService)) voice?.speak(text)
+                    }
+                    if (!alertedNow && !isTerminalAgain && !arrivalReminder && progress.index != turn &&
                         TripTracker.isStationAlertsEnabled(this@TripService)
                     ) {
                         val reached = trip.copy(progress = progress)
@@ -162,7 +169,9 @@ class TripService : Service() {
             R.string.trip_alert_text,
             resources.getQuantityString(R.plurals.trip_stations_left, left, left),
             trip.plan.destination.name,
-        ).replaceFirstChar { if (prefix.isNotEmpty()) it.lowercaseChar() else it }
+        ).replaceFirstChar { if (prefix.isNotEmpty()) it.lowercaseChar() else it }.let {
+            if (SettingsStore.get(this).remindBelongings) it + " " + getString(R.string.trip_belongings) else it
+        }
     }
 
     private fun finish() {
