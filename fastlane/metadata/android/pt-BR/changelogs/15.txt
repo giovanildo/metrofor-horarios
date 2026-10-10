@@ -1,0 +1,2 @@
+• O app agora diz "metrô" (Linha Sul) ou "VLT" (demais linhas) em vez de "trem".
+• O aviso de bike não aparece mais depois da última partida do dia.
