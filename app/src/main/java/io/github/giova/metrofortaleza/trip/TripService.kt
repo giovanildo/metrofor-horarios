@@ -9,6 +9,7 @@ import android.os.IBinder
 import androidx.core.app.ServiceCompat
 import io.github.giova.metrofortaleza.R
 import io.github.giova.metrofortaleza.data.LocationSource
+import io.github.giova.metrofortaleza.data.SettingsStore
 import io.github.giova.metrofortaleza.data.TripEstimator
 import io.github.giova.metrofortaleza.data.TripPlan
 import kotlinx.coroutines.CoroutineScope
@@ -45,7 +46,8 @@ class TripService : Service() {
             return START_NOT_STICKY
         }
         TripNotifications.createChannels(this)
-        val estimator = TripEstimator(plan)
+        val settings = SettingsStore.get(this)
+        val estimator = TripEstimator(plan, gpsLostMinutes = settings.gpsLostSeconds / 60.0)
         var trip = ActiveTrip(plan, estimator.progress(nowMinutes()), alerted = false, arrived = false)
         val started = runCatching {
             ServiceCompat.startForeground(
@@ -112,7 +114,7 @@ class TripService : Service() {
                     finish()
                     break
                 }
-                if (nowMinutes() > plan.destination.scheduled + trip.progress.delayMinutes + GIVE_UP_MINUTES) {
+                if (nowMinutes() > plan.destination.scheduled + trip.progress.delayMinutes + settings.tripGiveUpMinutes) {
                     finish()
                     break
                 }
@@ -180,7 +182,5 @@ class TripService : Service() {
         private const val GPS_INTERVAL_MILLIS = 5_000L
         private const val TICK_MILLIS = 15_000L
         private const val ARRIVED_LINGER_MILLIS = 60_000L
-        /** Se a viagem passou tanto do horário previsto, algo deu errado: encerra. */
-        private const val GIVE_UP_MINUTES = 30
     }
 }

@@ -137,7 +137,11 @@ fun TripCard(
                 text = if (trip.alerted) {
                     stringResource(R.string.trip_alert_sent)
                 } else {
-                    stringResource(R.string.trip_alert_at, plan.stops[plan.alertIndex].name)
+                    stringResource(
+                        R.string.trip_alert_at,
+                        plan.stops[plan.alertIndex].name,
+                        pluralStringResource(R.plurals.trip_stations_left, plan.alertStationsBefore, plan.alertStationsBefore),
+                    )
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -169,6 +173,7 @@ fun TripCard(
 @Composable
 fun TripStartCard(
     origins: List<Station>,
+    alertStationsBefore: Int,
     onStart: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -192,6 +197,7 @@ fun TripStartCard(
                         stringResource(
                             R.string.trip_start_from,
                             origins.joinToString(" ou ") { "${it.stopName} (${it.routeName})" },
+                            pluralStringResource(R.plurals.trip_stations_left, alertStationsBefore, alertStationsBefore),
                         )
                     } else {
                         stringResource(R.string.trip_start_needs_station)

@@ -81,8 +81,8 @@ primeiro plano, com notificação fixa, segue a viagem com a tela desligada:
   também é falado. A voz sai pelo canal de navegação: toca no fone e abaixa a
   música. Sem voz pt-BR instalada no aparelho, fica só a notificação.
 - **Distância até a partida.** Se a pessoa está a mais de **1 km** da estação de
-  partida, o app avisa antes de iniciar (até o GPS a encontrar na linha, a
-  posição sai só da tabela). A mais de **3 km**, a opção de modo viagem some,
+  partida (ajustável), o app avisa antes de iniciar (até o GPS a encontrar na
+  linha, a posição sai só da tabela). A mais de **3 km** (ajustável), a opção some,
   na tela inicial e na de partidas. A distância vem do GPS da tela inicial ou,
   com estação fixada, da última posição guardada no aparelho; sem posição
   conhecida, o app deixa iniciar.
@@ -112,6 +112,28 @@ partir das 15h. Os VLTs não aparecem no regulamento, por isso ficam de fora; no
 domingo o aviso de bike some, porque nesse dia só há operação especial e a regra
 dela não é conhecida. As regras estão fixas em `data/BikeBoarding.kt` — se o
 Metrofor mudar o regulamento, é lá que se mexe.
+
+Um ícone de **engrenagem** no topo abre as **Configurações**, com as distâncias
+e os tempos que antes eram fixos no código (`data/Settings.kt`; padrões entre
+parênteses):
+
+| Ajuste | Padrão | Faixa |
+|---|---|---|
+| Mostrar outras linhas até | 3 km | 500 m – 5 km |
+| Bicicletar perto de você até | 3 km | 500 m – 5 km |
+| Bicicletar perto da estação até | 600 m | 200 m – 1,5 km |
+| Avisar antes do destino | 2 estações | 1 – 4 |
+| Perguntar antes de começar a viagem a partir de | 1 km | 500 m – 3 km |
+| Esconder o modo viagem a partir de | 3 km | 1 – 10 km |
+| Considerar o GPS perdido depois de | 1 min | 30 s – 5 min |
+| Contar o trem que saiu há até | 2 min | 0 – 10 min |
+| Encerrar a viagem sozinho depois de | 30 min | 10 – 60 min |
+| Atualizar sua posição (tela inicial) a cada | 10 s | 5 – 60 s |
+
+O aviso de distância nunca fica maior que o limite em que o modo viagem some
+(mexer num ajusta o outro). "Restaurar padrões" volta tudo. Os parâmetros
+técnicos do GPS (precisão mínima, raio de estação) continuam fixos em
+`data/Trip.kt`, porque mexer neles exige entender o algoritmo.
 
 Um ícone de **informação** no topo abre a tela **Sobre**: o aviso de que o app
 não é oficial, de onde vêm os dados, a licença, o link do código-fonte e uma

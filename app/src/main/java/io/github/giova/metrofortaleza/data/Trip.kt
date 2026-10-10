@@ -22,17 +22,20 @@ data class TripPlan(
     val routeName: String,
     val headsign: String,
     val stops: List<TripStop>,
+    /** Quantas estações antes do destino vem o aviso de descida. */
+    val alertStationsBefore: Int = 2,
 ) {
     val origin get() = stops.first()
     val destination get() = stops.last()
 
-    /** A estação em que o aviso dispara: duas antes do destino, ou a origem se a viagem é curta. */
-    val alertIndex get() = (stops.lastIndex - ALERT_STATIONS_BEFORE).coerceAtLeast(0)
+    /** A estação em que o aviso dispara: N antes do destino, ou a origem se a viagem é curta. */
+    val alertIndex get() = (stops.lastIndex - alertStationsBefore).coerceAtLeast(0)
 
     fun toJson(): String = JSONObject()
         .put("routeId", routeId)
         .put("routeName", routeName)
         .put("headsign", headsign)
+        .put("alert", alertStationsBefore)
         .put("stops", JSONArray().apply {
             stops.forEach {
                 put(JSONObject().put("id", it.stopId).put("name", it.name)
@@ -42,8 +45,6 @@ data class TripPlan(
         .toString()
 
     companion object {
-        const val ALERT_STATIONS_BEFORE = 2
-
         fun fromJson(json: String): TripPlan? = runCatching {
             val o = JSONObject(json)
             val array = o.getJSONArray("stops")
@@ -55,6 +56,7 @@ data class TripPlan(
                     val s = array.getJSONObject(i)
                     TripStop(s.getString("id"), s.getString("name"), s.getDouble("lat"), s.getDouble("lon"), s.getInt("t"))
                 },
+                alertStationsBefore = o.optInt("alert", 2),
             )
         }.getOrNull()
     }
@@ -89,7 +91,11 @@ data class TripProgress(
  * sai da grade de horários, corrigida pelo atraso que o GPS mediu da última vez.
  * A posição nunca anda para trás.
  */
-class TripEstimator(private val plan: TripPlan) {
+class TripEstimator(
+    private val plan: TripPlan,
+    /** Sem posição boa por este tempo, o GPS é dado como perdido (configurável). */
+    private val gpsLostMinutes: Double = GPS_LOST_MINUTES,
+) {
 
     private var index = -1
     private var delay = 0.0
@@ -133,14 +139,14 @@ class TripEstimator(private val plan: TripPlan) {
             fix = lastFix,
             delayMinutes = delay,
             arrivalMinutes = plan.destination.scheduled + delay,
-            gpsSilentMinutes = silent.takeIf { it >= GPS_LOST_MINUTES },
+            gpsSilentMinutes = silent.takeIf { it >= gpsLostMinutes },
         )
     }
 
     companion object {
         /**
-         * Sem posição boa por 1 minuto (12 tentativas, uma a cada 5 s), o GPS é
-         * dado como inalcançável. É menos que o tempo entre duas estações
+         * Padrão: sem posição boa por 1 minuto (12 tentativas, uma a cada 5 s),
+         * o GPS é dado como inalcançável. Ajustável nas configurações. É menos que o tempo entre duas estações
          * (~2 min), então o aviso aparece antes de a estimativa errar de estação.
          */
         const val GPS_LOST_MINUTES = 1.0

@@ -39,7 +39,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import io.github.giova.metrofortaleza.data.BIKE_NEAR_YOU_MAX_METERS
 import io.github.giova.metrofortaleza.data.LocationSource
 import io.github.giova.metrofortaleza.data.MetroforDatabase
 import io.github.giova.metrofortaleza.data.PinnedStation
@@ -48,7 +47,7 @@ import io.github.giova.metrofortaleza.data.ScheduleSource
 import io.github.giova.metrofortaleza.data.ScheduleStore
 import io.github.giova.metrofortaleza.data.Station
 import io.github.giova.metrofortaleza.data.nearestBikeTo
-import io.github.giova.metrofortaleza.data.NEARBY_LINES_MAX_METERS
+import io.github.giova.metrofortaleza.data.SettingsStore
 import io.github.giova.metrofortaleza.data.nearestPerRoute
 import io.github.giova.metrofortaleza.data.nextDepartures
 import io.github.giova.metrofortaleza.data.nowMinutes
@@ -59,25 +58,20 @@ import kotlinx.coroutines.withContext
 
 private const val TICK_MILLIS = 15_000L
 
-/** GPS da tela inicial: a cada 10 s, ou ao andar 30 m. */
-private const val HOME_GPS_INTERVAL_MILLIS = 10_000L
+/** GPS da tela inicial: no intervalo das configurações, ou ao andar 30 m. */
 private const val HOME_GPS_MIN_METERS = 30f
 
-/** Modo viagem: aviso acima de 1 km da estação de partida; acima de 3 km, some. */
-private const val TRIP_WARN_START_METERS = 1_000.0
-private const val TRIP_MAX_START_METERS = 3_000.0
 private const val USER_POSITION_MAX_AGE_MILLIS = 10L * 60 * 1000
 
 private fun formatKm(meters: Double): String =
     if (meters < 1000) "${meters.toInt()} m" else "%.1f km".format(meters / 1000).replace('.', ',')
 
-/** Quem inicia a viagem já dentro do trem ainda pega a partida de até 2 min atrás. */
-private const val TRIP_LATE_BOARDING_MINUTES = 2
 
 
 @Composable
 fun AppRoot() {
     val context = LocalContext.current
+    val settings = SettingsStore.flow(context).collectAsState().value ?: SettingsStore.get(context)
 
     // O GTFS do Metrofor traz a grade do dia; baixamos uma vez por dia e o
     // repositório é recriado quando chega grade nova ou o dia vira.
@@ -116,6 +110,7 @@ fun AppRoot() {
     var routeId by rememberSaveable { mutableStateOf<String?>(null) }
     var stopId by rememberSaveable { mutableStateOf<String?>(null) }
     var showAbout by rememberSaveable { mutableStateOf(false) }
+    var showSettings by rememberSaveable { mutableStateOf(false) }
 
     val routes = remember(repo) { repo.routes() }
     val bikeStations = remember(repo) { repo.bikeStations() }
@@ -143,7 +138,7 @@ fun AppRoot() {
     fun nearbyState(stations: List<Station>, lat: Double, lon: Double): HomeStation.Nearby? {
         val perRoute = stations.nearestPerRoute(lat, lon)
         val (main, distance) = perRoute.firstOrNull() ?: return null
-        val others = perRoute.drop(1).filter { it.second <= NEARBY_LINES_MAX_METERS }
+        val others = perRoute.drop(1).filter { it.second <= settings.nearbyLinesMeters }
         return HomeStation.Nearby(main, distance, lat, lon, others)
     }
 
@@ -207,10 +202,10 @@ fun AppRoot() {
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
     val followGps = visible && homeState is HomeStation.Nearby
-    LaunchedEffect(followGps, repo) {
+    LaunchedEffect(followGps, repo, settings) {
         if (!followGps) return@LaunchedEffect
         val stations = withContext(Dispatchers.IO) { repo.stations() }
-        locationSource.updates(HOME_GPS_INTERVAL_MILLIS, HOME_GPS_MIN_METERS).collect { position ->
+        locationSource.updates(settings.homeGpsSeconds * 1000L, HOME_GPS_MIN_METERS).collect { position ->
             nearbyState(stations, position.latitude, position.longitude)?.let { homeState = it }
         }
     }
@@ -229,7 +224,7 @@ fun AppRoot() {
 
     /** Longe demais (ou posição desconhecida = deixa tentar). */
     fun tripAllowedFrom(lat: Double, lon: Double): Boolean =
-        (userDistanceTo(lat, lon) ?: 0.0) <= TRIP_MAX_START_METERS
+        (userDistanceTo(lat, lon) ?: 0.0) <= settings.tripMaxMeters
 
     var farTrip by remember { mutableStateOf<Pair<TripPlan, Double>?>(null) }
 
@@ -264,7 +259,7 @@ fun AppRoot() {
 
     fun startTrip(routeId: String, direction: Direction, origin: Stop, destination: Stop) {
         val route = repo.route(routeId) ?: return
-        val trip = repo.nextTrip(origin.id, routeId, direction.id, nowMinutes() - TRIP_LATE_BOARDING_MINUTES)
+        val trip = repo.nextTrip(origin.id, routeId, direction.id, nowMinutes() - settings.lateBoardingMinutes)
         if (trip == null) {
             tripMessage = context.getString(R.string.trip_no_trip_today)
             return
@@ -283,13 +278,13 @@ fun AppRoot() {
             tripMessage = context.getString(R.string.trip_no_trip_today)
             return
         }
-        val plan = TripPlan(routeId, route.name, direction.headsign, stops)
+        val plan = TripPlan(routeId, route.name, direction.headsign, stops, settings.alertStationsBefore)
         val distance = userDistanceTo(plan.origin.lat, plan.origin.lon)
         when {
-            distance != null && distance > TRIP_MAX_START_METERS -> tripMessage = context.getString(
-                R.string.trip_too_far, formatKm(distance), plan.origin.name,
+            distance != null && distance > settings.tripMaxMeters -> tripMessage = context.getString(
+                R.string.trip_too_far, formatKm(distance), plan.origin.name, formatKm(settings.tripMaxMeters.toDouble()),
             )
-            distance != null && distance > TRIP_WARN_START_METERS -> farTrip = plan to distance
+            distance != null && distance > settings.tripWarnMeters -> farTrip = plan to distance
             else -> launchTrip(plan)
         }
     }
@@ -376,15 +371,15 @@ fun AppRoot() {
     }
 
     // Com GPS, o Bicicletar mais perto da pessoa; com estação fixada, o da estação.
-    val homeBike = remember(homeState, bikeStations) {
+    val homeBike = remember(homeState, bikeStations, settings) {
         when (val state = homeState) {
             is HomeStation.Nearby -> bikeStations
-                .nearestBikeTo(state.userLat, state.userLon, BIKE_NEAR_YOU_MAX_METERS)
+                .nearestBikeTo(state.userLat, state.userLon, settings.bikeNearYouMeters.toDouble())
                 ?.let { (bike, distance) -> NearbyBike(bike, distance) }
                 ?.let { HomeBike(it, fromYou = true) }
 
             is HomeStation.Pinned -> bikeStations
-                .nearestBikeTo(state.station.lat, state.station.lon)
+                .nearestBikeTo(state.station.lat, state.station.lon, settings.bikeNearStationMeters.toDouble())
                 ?.let { (bike, distance) -> NearbyBike(bike, distance) }
                 ?.let { HomeBike(it, fromYou = false) }
 
@@ -399,6 +394,16 @@ fun AppRoot() {
 
     // --------------------------------------------------------------- telas ----
     when {
+        showSettings -> {
+            BackHandler { showSettings = false }
+            SettingsScreen(
+                settings = settings,
+                onChange = { SettingsStore.save(context, it) },
+                onReset = { SettingsStore.reset(context) },
+                onBack = { showSettings = false },
+            )
+        }
+
         showAbout -> {
             BackHandler { showAbout = false }
             AboutScreen(onBack = { showAbout = false })
@@ -408,9 +413,9 @@ fun AppRoot() {
             val directions = remember(route.id) { repo.directions(route.id) }
             val isPinned = pinned.get() == (stop.id to route.id)
             // O Stop da navegação não carrega coordenadas; o Station sim.
-            val bike = remember(stop.id, route.id, bikeStations) {
+            val bike = remember(stop.id, route.id, bikeStations, settings) {
                 repo.station(stop.id, route.id)
-                    ?.let { bikeStations.nearestBikeTo(it.lat, it.lon) }
+                    ?.let { bikeStations.nearestBikeTo(it.lat, it.lon, settings.bikeNearStationMeters.toDouble()) }
                     ?.let { (station, distance) -> NearbyBike(station, distance) }
             }
             BackHandler { stopId = null }
@@ -459,6 +464,7 @@ fun AppRoot() {
             stationCount = { repo.stationCount(it.id) },
             onRouteClick = { routeId = it.id },
             onAbout = { showAbout = true },
+            onSettings = { showSettings = true },
             header = {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     val trip = activeTrip
@@ -476,6 +482,7 @@ fun AppRoot() {
                         if (homeState.station == null || tripOrigins.isNotEmpty()) {
                             TripStartCard(
                                 origins = tripOrigins,
+                                alertStationsBefore = settings.alertStationsBefore,
                                 onStart = { pickingHomeDestination = true },
                             )
                         }

@@ -35,23 +35,10 @@ fun List<Station>.nearestPerRoute(lat: Double, lon: Double): List<Pair<Station, 
         .sortedBy { it.second }
 
 /**
- * Raio em que outras linhas também ganham cartão na tela inicial — por
- * exemplo Chico da Silva (Sul) e Moura Brasil (Oeste), a ~200 m uma da outra.
- */
-const val NEARBY_LINES_MAX_METERS = 3_000.0
-
-/**
- * Distância a pé que ainda vale a pena para pegar uma bicicleta. Acima disso o
- * app não mostra nada, porque "Bicicletar a 2 km" não ajuda ninguém.
+ * Padrão da distância a pé que ainda vale a pena para pegar uma bicicleta perto
+ * de uma estação. A pessoa ajusta nas configurações ([AppSettings]).
  */
 const val BIKE_MAX_METERS = 600.0
-
-/**
- * Raio para o Bicicletar mais perto de *você* na tela inicial. É maior que
- * [BIKE_MAX_METERS] porque ali a pessoa ainda não está numa estação de metrô,
- * mas acima disso (fora de Fortaleza, por exemplo) o card some.
- */
-const val BIKE_NEAR_YOU_MAX_METERS = 3_000.0
 
 /** A estação de bicicleta mais próxima de ([lat], [lon]), dentro de [maxMeters]. */
 fun List<BikeStation>.nearestBikeTo(

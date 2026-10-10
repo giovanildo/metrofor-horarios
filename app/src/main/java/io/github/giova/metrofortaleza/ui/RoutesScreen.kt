@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.Icons
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,6 +46,7 @@ fun RoutesScreen(
     onRouteClick: (Route) -> Unit,
     header: @Composable () -> Unit = {},
     onAbout: () -> Unit = {},
+    onSettings: () -> Unit = {},
 ) {
     Scaffold(
         topBar = {
@@ -60,6 +62,9 @@ fun RoutesScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = onSettings) {
+                        Icon(Icons.Outlined.Settings, contentDescription = stringResource(R.string.settings_title))
+                    }
                     IconButton(onClick = onAbout) {
                         Icon(Icons.Outlined.Info, contentDescription = stringResource(R.string.about_title))
                     }
