@@ -204,7 +204,11 @@ técnicos do GPS (precisão mínima, raio de estação) continuam fixos em
 
 Um ícone de **informação** no topo abre a tela **Sobre**: o aviso de que o app
 não é oficial, de onde vêm os dados, a licença, o **endereço do projeto** por
-extenso (toque abre; botão "Copiar link"), um **QR code** para outra pessoa
+extenso (toque abre; botão "Copiar link"), um botão **"Divulgar o app"** que
+abre o compartilhamento do Android (WhatsApp etc.) com uma mensagem pronta e o
+link da [página do app](https://giovanildo.github.io/metro-fortaleza-horarios/)
+— que gera prévia com imagem, em vez de um link de `.apk` com cara de spam —,
+um **QR code** para outra pessoa
 baixar o app apontando a câmera para a tela (`res/drawable-nodpi/qr_download.png`,
 para `releases/latest`, sempre sobre fundo branco) e uma chave Pix para quem
 quiser apoiar o projeto (`PIX_KEY` em `ui/AboutScreen.kt`; vazia, a seção de

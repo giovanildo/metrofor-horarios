@@ -27,6 +27,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -51,6 +52,9 @@ import io.github.giova.metrofortaleza.R
 private const val PIX_KEY = "giovanildos@gmail.com"
 
 private const val REPO_URL = "https://github.com/giovanildo/metro-fortaleza-horarios"
+
+/** Página de apresentação (GitHub Pages): o link certo para divulgar. */
+private const val SITE_URL = "https://giovanildo.github.io/metro-fortaleza-horarios/"
 
 /** Sobre o app: aviso de não oficial, fontes dos dados, licença e doação. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -137,6 +141,17 @@ fun AboutScreen(onBack: () -> Unit) {
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.fillMaxWidth(),
                 )
+                // Compartilha o link da página do app (com prévia no WhatsApp),
+                // não o do .apk, que parece spam para quem não conhece.
+                val shareMessage = stringResource(R.string.about_share_message, SITE_URL)
+                val shareChooser = stringResource(R.string.about_share_button)
+                Button(
+                    onClick = { share(context, shareMessage, shareChooser) },
+                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                ) {
+                    Icon(Icons.Filled.Share, contentDescription = null, modifier = Modifier.size(20.dp))
+                    Text(shareChooser, modifier = Modifier.padding(start = 8.dp))
+                }
                 // Fundo sempre branco: no tema escuro o QR invertido não é lido.
                 Surface(
                     color = androidx.compose.ui.graphics.Color.White,
@@ -206,6 +221,13 @@ private fun copy(context: Context, label: String, text: String, toast: Int) {
     val clipboard = context.getSystemService(ClipboardManager::class.java)
     clipboard.setPrimaryClip(ClipData.newPlainText(label, text))
     Toast.makeText(context, toast, Toast.LENGTH_SHORT).show()
+}
+
+private fun share(context: Context, message: String, chooserTitle: String) {
+    val send = Intent(Intent.ACTION_SEND)
+        .setType("text/plain")
+        .putExtra(Intent.EXTRA_TEXT, message)
+    runCatching { context.startActivity(Intent.createChooser(send, chooserTitle)) }
 }
 
 private fun open(context: Context, url: String) {
