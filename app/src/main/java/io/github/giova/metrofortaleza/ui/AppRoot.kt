@@ -232,6 +232,8 @@ fun AppRoot() {
         (userDistanceTo(lat, lon) ?: 0.0) <= settings.tripMaxMeters
 
     var farTrip by remember { mutableStateOf<Pair<TripPlan, Double>?>(null) }
+    // Direto x sentado pelo terminal, esperando a escolha da pessoa.
+    var tripChoice by remember { mutableStateOf<Pair<TripPlan, TripPlan>?>(null) }
 
     val activeTrip by TripTracker.active.collectAsState()
     val tripSound by TripTracker.soundEnabled(context).collectAsState()
@@ -262,28 +264,22 @@ fun AppRoot() {
         tripPermissionLauncher.launch(needed.toTypedArray())
     }
 
-    fun startTrip(routeId: String, direction: Direction, origin: Stop, destination: Stop) {
-        val route = repo.route(routeId) ?: return
-        val trip = repo.nextTrip(origin.id, routeId, direction.id, nowMinutes() - settings.lateBoardingMinutes)
-        if (trip == null) {
-            tripMessage = context.getString(R.string.trip_no_trip_today)
-            return
-        }
-        val (_, times) = trip
+    // Trecho de uma viagem: as estações de [fromId] até [toId] no sentido dado,
+    // com o horário de um trem específico em cada uma.
+    fun leg(routeId: String, directionId: Int, fromId: String, toId: String, times: Map<String, Int>): List<TripStop>? {
         val coords = repo.stations().filter { it.routeId == routeId }.associateBy { it.stopId }
-        val path = repo.stops(routeId, direction.id)
-            .dropWhile { it.id != origin.id }
-            .let { list -> list.take(list.indexOfFirst { it.id == destination.id } + 1) }
-        val stops = path.mapNotNull { stop ->
-            val station = coords[stop.id] ?: return@mapNotNull null
-            val time = times[stop.id] ?: return@mapNotNull null
+        val path = repo.stops(routeId, directionId).dropWhile { it.id != fromId }
+        val end = path.indexOfFirst { it.id == toId }
+        if (path.isEmpty() || end < 0) return null
+        return path.take(end + 1).map { stop ->
+            val station = coords[stop.id] ?: return null
+            val time = times[stop.id] ?: return null
             TripStop(stop.id, stop.name, station.lat, station.lon, time)
         }
-        if (stops.size < 2) {
-            tripMessage = context.getString(R.string.trip_no_trip_today)
-            return
-        }
-        val plan = TripPlan(routeId, route.name, direction.headsign, stops, settings.alertStationsBefore)
+    }
+
+    // Confere a distância até a partida e começa (ou pergunta antes).
+    fun confirmAndLaunch(plan: TripPlan) {
         val distance = userDistanceTo(plan.origin.lat, plan.origin.lon)
         when {
             distance != null && distance > settings.tripMaxMeters -> tripMessage = context.getString(
@@ -292,6 +288,38 @@ fun AppRoot() {
             distance != null && distance > settings.tripWarnMeters -> farTrip = plan to distance
             else -> launchTrip(plan)
         }
+    }
+
+    fun startTrip(routeId: String, direction: Direction, origin: Stop, destination: Stop) {
+        val route = repo.route(routeId) ?: return
+        val from = nowMinutes() - settings.lateBoardingMinutes
+        val direct = repo.nextTrip(origin.id, routeId, direction.id, from)
+            ?.let { (_, times) -> leg(routeId, direction.id, origin.id, destination.id, times) }
+            ?.takeIf { it.size >= 2 }
+            ?.let { TripPlan(routeId, route.name, direction.headsign, it, settings.alertStationsBefore) }
+        if (direct == null) {
+            tripMessage = context.getString(R.string.trip_no_trip_today)
+            return
+        }
+
+        // "Sentado pelo terminal": se o terminal do outro sentido está perto,
+        // vai até ele e volta no mesmo trem, que lá esvazia.
+        val seated = run {
+            if (settings.seatedMaxStations <= 0) return@run null
+            val back = repo.directions(routeId).firstOrNull { it.id != direction.id } ?: return@run null
+            val toTerminal = repo.stops(routeId, back.id).dropWhile { it.id != origin.id }
+            val terminal = toTerminal.lastOrNull() ?: return@run null
+            if (toTerminal.size - 1 !in 1..settings.seatedMaxStations) return@run null
+            val (_, times1) = repo.nextTrip(origin.id, routeId, back.id, from) ?: return@run null
+            val going = leg(routeId, back.id, origin.id, terminal.id, times1) ?: return@run null
+            val (_, times2) = repo.nextTrip(terminal.id, routeId, direction.id, going.last().scheduled) ?: return@run null
+            val returning = leg(routeId, direction.id, terminal.id, destination.id, times2) ?: return@run null
+            TripPlan(
+                routeId, route.name, direction.headsign, going + returning,
+                settings.alertStationsBefore, turnaroundIndex = going.lastIndex,
+            )
+        }
+        if (seated == null) confirmAndLaunch(direct) else tripChoice = direct to seated
     }
 
     // Outras linhas a até 3 km (cada uma ganha cartão próprio na tela inicial).
@@ -327,6 +355,18 @@ fun AppRoot() {
                 startTrip(group.routeId, group.direction, group.origin, destination)
             },
             onDismiss = { pickingHomeDestination = false },
+        )
+    }
+
+    tripChoice?.let { (direct, seated) ->
+        TripChoiceDialog(
+            direct = direct,
+            seated = seated,
+            onPick = { plan ->
+                tripChoice = null
+                confirmAndLaunch(plan)
+            },
+            onDismiss = { tripChoice = null },
         )
     }
 

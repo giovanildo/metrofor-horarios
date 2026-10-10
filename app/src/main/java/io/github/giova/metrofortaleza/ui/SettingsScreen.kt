@@ -84,6 +84,12 @@ fun SettingsScreen(
                 format = { if (it == 1) "1 estação" else "$it estações" },
             ) { onChange(settings.copy(alertStationsBefore = it)) }
             SettingSlider(
+                title = R.string.settings_seated,
+                description = R.string.settings_seated_desc,
+                value = settings.seatedMaxStations, range = 0..5, step = 1,
+                format = { when (it) { 0 -> "não oferecer"; 1 -> "1 estação"; else -> "$it estações" } },
+            ) { onChange(settings.copy(seatedMaxStations = it)) }
+            SettingSlider(
                 title = R.string.settings_trip_warn,
                 description = R.string.settings_trip_warn_desc,
                 value = settings.tripWarnMeters, range = 500..3_000, step = 250, format = ::formatMeters,

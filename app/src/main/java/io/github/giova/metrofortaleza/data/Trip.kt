@@ -24,7 +24,16 @@ data class TripPlan(
     val stops: List<TripStop>,
     /** Quantas estações antes do destino vem o aviso de descida. */
     val alertStationsBefore: Int = 2,
+    /**
+     * Viagem "sentado pelo terminal": índice da chegada ao terminal, onde o
+     * trem volta (a próxima parada é o mesmo terminal, já como partida).
+     * -1 = viagem direta.
+     */
+    val turnaroundIndex: Int = -1,
 ) {
+    val viaTerminal get() = turnaroundIndex in 0 until stops.lastIndex
+    val terminal get() = stops.getOrNull(turnaroundIndex)
+
     val origin get() = stops.first()
     val destination get() = stops.last()
 
@@ -36,6 +45,7 @@ data class TripPlan(
         .put("routeName", routeName)
         .put("headsign", headsign)
         .put("alert", alertStationsBefore)
+        .put("turn", turnaroundIndex)
         .put("stops", JSONArray().apply {
             stops.forEach {
                 put(JSONObject().put("id", it.stopId).put("name", it.name)
@@ -57,6 +67,7 @@ data class TripPlan(
                     TripStop(s.getString("id"), s.getString("name"), s.getDouble("lat"), s.getDouble("lon"), s.getInt("t"))
                 },
                 alertStationsBefore = o.optInt("alert", 2),
+                turnaroundIndex = o.optInt("turn", -1),
             )
         }.getOrNull()
     }
@@ -108,10 +119,15 @@ class TripEstimator(
         if (accuracyMeters > MAX_ACCURACY_METERS) return
         // Posição boa, mesmo longe de estação: o GPS está alcançável.
         lastGoodGps = nowMinutes
-        val (nearest, distance) = plan.stops.withIndex()
+        // Numa viagem pelo terminal a mesma estação aparece duas vezes (ida e
+        // volta): das que estão no raio, vale a próxima à frente; só sem
+        // nenhuma à frente olhamos para trás.
+        val inRange = plan.stops.withIndex()
             .map { (i, stop) -> i to distanceMeters(lat, lon, stop.lat, stop.lon) }
-            .minBy { it.second }
-        if (distance > STATION_RADIUS_METERS) return
+            .filter { it.second <= STATION_RADIUS_METERS }
+        if (inRange.isEmpty()) return
+        val (nearest, distance) = inRange.filter { it.first >= index }.minByOrNull { it.first }
+            ?: inRange.maxBy { it.first }
         // Voltar só com GPS muito bom: é o caso de quem ainda espera na estação
         // um trem atrasado, enquanto a grade já "andou" sozinha.
         val confident = accuracyMeters <= CONFIDENT_ACCURACY_METERS && distance <= CONFIDENT_RADIUS_METERS
@@ -127,6 +143,9 @@ class TripEstimator(
 
     /** O estado agora, avançando pela grade quando o GPS não diz nada novo. */
     fun progress(nowMinutes: Double): TripProgress {
+        // No terminal o trem espera o horário de saída: passado dele, um
+        // adiantamento medido na ida não vale mais.
+        if (plan.viaTerminal && index >= plan.turnaroundIndex && delay < 0) delay = 0.0
         val bySchedule = plan.stops.indexOfLast { it.scheduled + delay <= nowMinutes }
         if (bySchedule > index) {
             index = bySchedule

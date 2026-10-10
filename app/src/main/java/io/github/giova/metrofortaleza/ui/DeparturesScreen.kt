@@ -102,11 +102,18 @@ fun DeparturesScreen(
     val tomorrow = remember(direction) { direction?.let(tomorrowFor) }
     val next = remember(all, tomorrow, now) { nextDepartures(all, now, NEXT_COUNT, tomorrow) }
     val sunday = remember(now) { isSundayToday() }
-    val destinations = remember(direction) { direction?.let(destinationsFor).orEmpty() }
+    // Destinos nos dois sentidos — o da aba aberta primeiro. Só o sentido da
+    // aba escondia, por exemplo, Carlito Benevides de quem estava na aba
+    // "→ Chico da Silva".
+    val destinationGroups = remember(direction, directions) {
+        directions.sortedByDescending { it == direction }
+            .map { DestinationGroup("→ ${it.headsign}", route.id, stop, it, destinationsFor(it)) }
+    }
+    val destinations = destinationGroups.flatMap { it.stops }
     var pickingDestination by remember { mutableStateOf(false) }
     if (pickingDestination && direction != null) {
         DestinationDialog(
-            groups = listOf(DestinationGroup("→ ${direction.headsign}", route.id, stop, direction, destinations)),
+            groups = destinationGroups,
             onPick = { group, destination ->
                 pickingDestination = false
                 onStartTrip(group.direction, destination)

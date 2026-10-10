@@ -31,6 +31,11 @@ data class AppSettings(
     val lateBoardingMinutes: Int = 2,
     /** A viagem encerra sozinha se passar tanto assim da chegada prevista. */
     val tripGiveUpMinutes: Int = 30,
+    /**
+     * Até quantas estações de um terminal o modo viagem oferece ir até ele e
+     * voltar sentado. 0 = não oferecer.
+     */
+    val seatedMaxStations: Int = 3,
 )
 
 /** Guarda as [AppSettings] no aparelho e avisa a interface quando mudam. */
@@ -57,6 +62,7 @@ object SettingsStore {
             putInt("home_gps_s", settings.homeGpsSeconds)
             putInt("late_boarding_min", settings.lateBoardingMinutes)
             putInt("trip_give_up_min", settings.tripGiveUpMinutes)
+            putInt("seated_max_stations", settings.seatedMaxStations)
         }
         state.value = settings
     }
@@ -80,6 +86,7 @@ object SettingsStore {
             homeGpsSeconds = p.getInt("home_gps_s", d.homeGpsSeconds),
             lateBoardingMinutes = p.getInt("late_boarding_min", d.lateBoardingMinutes),
             tripGiveUpMinutes = p.getInt("trip_give_up_min", d.tripGiveUpMinutes),
+            seatedMaxStations = p.getInt("seated_max_stations", d.seatedMaxStations),
         )
     }
 

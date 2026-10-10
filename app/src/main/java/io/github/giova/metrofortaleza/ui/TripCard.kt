@@ -1,6 +1,7 @@
 package io.github.giova.metrofortaleza.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalIconToggleButton
 import androidx.compose.material3.FilterChip
@@ -41,6 +43,7 @@ import io.github.giova.metrofortaleza.data.Direction
 import io.github.giova.metrofortaleza.data.Station
 import io.github.giova.metrofortaleza.data.Stop
 import io.github.giova.metrofortaleza.data.TripFix
+import io.github.giova.metrofortaleza.data.TripPlan
 import io.github.giova.metrofortaleza.data.formatTime
 import io.github.giova.metrofortaleza.trip.ActiveTrip
 import kotlin.math.roundToInt
@@ -75,6 +78,12 @@ fun TripCard(
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                     )
+                    plan.terminal?.takeIf { plan.viaTerminal }?.let { terminal ->
+                        Text(
+                            text = stringResource(R.string.trip_via_terminal, terminal.name),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
                 }
                 FilledTonalIconToggleButton(checked = soundEnabled, onCheckedChange = onToggleSound) {
                     Icon(
@@ -262,4 +271,63 @@ fun DestinationDialog(
         confirmButton = {},
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
     )
+}
+
+/** Direto ou sentado pelo terminal: horários dos dois para a pessoa escolher. */
+@Composable
+fun TripChoiceDialog(
+    direct: TripPlan,
+    seated: TripPlan,
+    onPick: (TripPlan) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val terminal = seated.terminal ?: return
+    val backAt = seated.stops[seated.turnaroundIndex + 1].scheduled
+    val extra = seated.destination.scheduled - direct.destination.scheduled
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.trip_choice_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                ChoiceOption(
+                    title = stringResource(R.string.trip_choice_direct),
+                    description = stringResource(
+                        R.string.trip_choice_direct_desc,
+                        formatTime(direct.origin.scheduled),
+                        formatTime(direct.destination.scheduled),
+                    ),
+                    onClick = { onPick(direct) },
+                )
+                ChoiceOption(
+                    title = stringResource(R.string.trip_choice_seated, terminal.name),
+                    description = stringResource(
+                        R.string.trip_choice_seated_desc,
+                        formatTime(seated.origin.scheduled),
+                        terminal.name,
+                        formatTime(backAt),
+                        formatTime(seated.destination.scheduled),
+                        extra.coerceAtLeast(0),
+                    ),
+                    onClick = { onPick(seated) },
+                )
+                Text(
+                    text = stringResource(R.string.trip_choice_note),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        },
+        confirmButton = {},
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
+    )
+}
+
+@Composable
+private fun ChoiceOption(title: String, description: String, onClick: () -> Unit) {
+    OutlinedCard(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+            Text(description, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 4.dp))
+        }
+    }
 }

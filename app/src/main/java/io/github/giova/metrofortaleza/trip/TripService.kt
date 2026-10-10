@@ -85,8 +85,20 @@ class TripService : Service() {
                 }
                 // Estação nova alcançada. Na estação do aviso principal, ele já basta.
                 if (progress.index > announced) {
+                    val previous = announced
                     announced = progress.index
-                    if (!alertedNow && TripTracker.isStationAlertsEnabled(this@TripService)) {
+                    // Chegou ao terminal de uma viagem "sentado": avisar para ficar no trem.
+                    val turn = plan.turnaroundIndex
+                    if (plan.viaTerminal && previous < turn && progress.index >= turn) {
+                        val reached = trip.copy(progress = progress)
+                        val text = TripNotifications.turnaround(this@TripService, reached)
+                        if (TripTracker.isSoundEnabled(this@TripService)) voice?.speak(text)
+                    }
+                    // A partida do terminal é a mesma estação: não anunciar de novo.
+                    val isTerminalAgain = plan.viaTerminal && progress.index == turn + 1
+                    if (!alertedNow && !isTerminalAgain && progress.index != turn &&
+                        TripTracker.isStationAlertsEnabled(this@TripService)
+                    ) {
                         val reached = trip.copy(progress = progress)
                         TripNotifications.station(this@TripService, reached)
                         voice?.speak(spokenStation(reached))

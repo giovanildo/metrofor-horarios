@@ -115,6 +115,17 @@ primeiro plano, com notificação fixa, segue a viagem com a tela desligada:
   na tela inicial e na de partidas. A distância vem do GPS da tela inicial ou,
   com estação fixada, da última posição guardada no aparelho; sem posição
   conhecida, o app deixa iniciar.
+- **Ir sentado pelo terminal.** Perto de um terminal (até 3 estações,
+  ajustável; 0 desliga), indo no sentido contrário a ele, o app pergunta "Como
+  você quer ir?": **direto** ou **sentado** — seguir até o terminal, onde o trem
+  esvazia, e voltar nele. Mostra os horários dos dois e quanto o sentado custa
+  (em geral um intervalo, ~18 min na Linha Sul). No terminal avisa "fique no
+  trem, ele volta às HH:MM"; na volta, as estações repetidas são reconhecidas
+  como volta (o GPS sempre casa com a próxima ocorrência à frente). O trem não
+  sai do terminal antes do horário: adiantamento medido na ida é descartado ali.
+  O app não sabe a lotação — é uma sugestão de quem anda de metrô.
+- O destino pode estar nos **dois sentidos**, tanto pelo cartão do topo quanto
+  pelo botão da tela de horários (antes, ali, só o sentido da aba aberta).
 - Durante a viagem, o cartão da estação em destaque some da tela inicial: o da
   viagem já diz onde a pessoa está.
 - A viagem encerra sozinha ao chegar, ou 30 min depois da chegada prevista.
@@ -157,6 +168,7 @@ parênteses):
 | Considerar o GPS perdido depois de | 1 min | 30 s – 5 min |
 | Contar o trem que saiu há até | 2 min | 0 – 10 min |
 | Encerrar a viagem sozinho depois de | 30 min | 10 – 60 min |
+| Oferecer ir sentado pelo terminal até | 3 estações | 0 (não oferecer) – 5 |
 | Atualizar sua posição (tela inicial) a cada | 10 s | 5 – 60 s |
 
 O aviso de distância nunca fica maior que o limite em que o modo viagem some

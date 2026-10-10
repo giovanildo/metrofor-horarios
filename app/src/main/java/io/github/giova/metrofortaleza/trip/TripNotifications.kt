@@ -120,6 +120,32 @@ internal object TripNotifications {
         }
     }
 
+    /**
+     * No terminal de uma viagem "sentado pelo terminal": ficar no trem, que volta.
+     * Devolve o texto, para a voz falar o mesmo.
+     */
+    fun turnaround(context: Context, trip: ActiveTrip): String {
+        val plan = trip.plan
+        val terminal = plan.terminal ?: return ""
+        // O trem não sai do terminal antes do horário: adiantamento não conta.
+        val backAt = plan.stops[plan.turnaroundIndex + 1].scheduled + trip.progress.delayMinutes.coerceAtLeast(0.0)
+        val title = context.getString(R.string.trip_turnaround_title, terminal.name)
+        val text = context.getString(R.string.trip_turnaround_text, formatTime(backAt.roundToInt()), plan.headsign)
+        val notification = NotificationCompat.Builder(context, CHANNEL_STATION)
+            .setSmallIcon(R.drawable.ic_launcher)
+            .setContentTitle(title)
+            .setContentText(text)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setDefaults(NotificationCompat.DEFAULT_SOUND)
+            .setAutoCancel(true)
+            .setContentIntent(openApp(context))
+            .build()
+        runCatching {
+            context.getSystemService(NotificationManager::class.java).notify(STATION_ID, notification)
+        }
+        return "$title. $text"
+    }
+
     /** A notificação fixa enquanto a viagem dura. */
     fun ongoing(context: Context, trip: ActiveTrip): android.app.Notification {
         val plan = trip.plan
