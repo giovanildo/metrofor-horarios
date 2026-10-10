@@ -1,0 +1,1 @@
+• Tela Sobre: endereço do projeto, botão para copiar o link e um QR code para outra pessoa baixar o app apontando a câmera.
