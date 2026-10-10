@@ -1,0 +1,2 @@
+• Integrações: o app avisa se a troca de linha é paga ou gratuita. Em Parangaba, da Sul para a Nordeste é grátis (a Nordeste está gratuita na implantação); da Nordeste para a Sul é pago. Chico da Silva e Moura Brasil: pago.
+• Nos terminais, aparece só o sentido em que dá para embarcar.
