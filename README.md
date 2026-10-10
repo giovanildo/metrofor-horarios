@@ -58,6 +58,27 @@ Com a tela inicial aberta e a estação vindo do GPS, o app segue a posição
 continuamente (a cada 10 s ou 30 m): ao descer em outra estação, o destaque
 muda sozinho. Uma estação fixada pela estrela continua tendo prioridade.
 
+### Integração entre linhas
+
+Nas estações de troca de linha, a tela de horários mostra um bloco **"Integração
+com"** a outra linha: o nome da estação de lá, o tempo a pé e, em cada sentido, o
+primeiro trem **que ainda dá para pegar** (partida depois de agora + caminhada).
+Tocar no bloco abre a outra estação já no sentido mostrado. Nos terminais, o
+sentido que só chega ali fica de fora. Os pontos vêm da tabela `transfer` do
+banco (`TRANSFERS` em `tools/build_db.py` e `GtfsImporter.kt`):
+
+| Integração | Linhas | A pé |
+|---|---|---|
+| Parangaba ↔ Parangaba - NE | Sul ↔ Nordeste | 2 min |
+| Expedicionários ↔ Expedicionários - AE | Nordeste ↔ VLT Aeroporto | 3 min |
+| Chico da Silva ↔ Moura Brasil | Sul ↔ Oeste | 5 min (~200 m) |
+
+**Passagem.** Se a integração é paga ou gratuita fica em
+`data/TransferFares.kt` (`FREE`, `PAID` ou `UNKNOWN`), fixo no código porque
+não vem do GTFS. Com `UNKNOWN` o app não diz nada sobre passagem, para não
+informar errado; com os outros, mostra "Integração gratuita" ou "Integração
+paga" no bloco.
+
 ### Modo viagem
 
 O cartão **Modo viagem** fica no topo da tela inicial: a origem é a estação em

@@ -64,3 +64,16 @@ data class BikeStation(
     val lat: Double,
     val lon: Double,
 )
+
+/** Um sentido de outra linha que se alcança a pé a partir de uma estação. */
+data class TransferTarget(
+    val stopId: String,
+    val stopName: String,
+    val walkMinutes: Int,
+    val routeId: String,
+    val routeName: String,
+    val routeColor: String,
+    val direction: Direction,
+    /** Se trocar de linha aqui exige nova passagem. */
+    val fare: TransferFare = TransferFare.UNKNOWN,
+)

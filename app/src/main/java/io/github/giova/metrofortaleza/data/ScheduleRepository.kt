@@ -110,6 +110,40 @@ class ScheduleRepository(context: Context) {
         return tripId to times
     }
 
+    /**
+     * Baldeações a partir de [stopId]: a estação da outra linha, o tempo a pé e
+     * os sentidos em que dá para **partir** de lá — nos terminais, o sentido que
+     * termina na própria estação é só chegada e fica de fora.
+     */
+    fun transfersFrom(stopId: String): List<TransferTarget> = db.rawQuery(
+        """
+        SELECT t.to_stop_id, s.name, t.walk_minutes, rs.route_id, r.name, r.color, rs.direction_id, d.headsign,
+               f.name
+        FROM transfer t
+        JOIN stop s ON s.stop_id = t.to_stop_id
+        JOIN stop f ON f.stop_id = t.from_stop_id
+        JOIN route_stop rs ON rs.stop_id = t.to_stop_id
+        JOIN route r ON r.route_id = rs.route_id
+        JOIN direction d ON d.route_id = rs.route_id AND d.direction_id = rs.direction_id
+        WHERE t.from_stop_id = ?
+          AND rs.seq < (SELECT MAX(x.seq) FROM route_stop x
+                        WHERE x.route_id = rs.route_id AND x.direction_id = rs.direction_id)
+        ORDER BY r.sort_order, rs.direction_id
+        """.trimIndent(),
+        arrayOf(stopId),
+    ).map {
+        TransferTarget(
+            stopId = it.getString(0),
+            stopName = it.getString(1),
+            walkMinutes = it.getInt(2),
+            routeId = it.getString(3),
+            routeName = it.getString(4),
+            routeColor = it.getString(5),
+            direction = Direction(it.getInt(6), it.getString(7)),
+            fare = transferFare(it.getString(8), it.getString(1)),
+        )
+    }
+
     /** Todas as combinações estação/linha, para a busca da mais próxima. */
     fun stations(): List<Station> = db.rawQuery(
         """

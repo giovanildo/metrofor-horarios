@@ -49,6 +49,7 @@ import io.github.giova.metrofortaleza.data.nowDayOfWeek
 import io.github.giova.metrofortaleza.data.Departure
 import io.github.giova.metrofortaleza.data.Direction
 import io.github.giova.metrofortaleza.data.Route
+import io.github.giova.metrofortaleza.data.TransferTarget
 import io.github.giova.metrofortaleza.data.ScheduleSource
 import io.github.giova.metrofortaleza.data.Stop
 import io.github.giova.metrofortaleza.data.formatTime
@@ -72,13 +73,20 @@ fun DeparturesScreen(
     destinationsFor: (Direction) -> List<Stop>,
     onStartTrip: (Direction, Stop) -> Unit,
     tripAllowed: Boolean,
+    transfers: List<TransferTarget>,
+    transferDepartures: (TransferTarget, Int) -> Departure?,
+    onOpenTransfer: (TransferTarget) -> Unit,
+    initialDirectionId: Int? = null,
     schedule: ScheduleSource,
     bike: NearbyBike?,
     isPinned: Boolean,
     onTogglePin: () -> Unit,
     onBack: () -> Unit,
 ) {
-    var selectedTab by rememberSaveable { mutableIntStateOf(0) }
+    // A aba é da estação: ao abrir outra, volta para o sentido pedido (ou o primeiro).
+    var selectedTab by rememberSaveable(stop.id, route.id) {
+        mutableIntStateOf(directions.indexOfFirst { it.id == initialDirectionId }.coerceAtLeast(0))
+    }
     var now by remember { mutableIntStateOf(nowMinutes()) }
 
     // O relógio do app precisa andar sozinho para a contagem regressiva não travar.
@@ -210,6 +218,20 @@ fun DeparturesScreen(
 
                 if (bikeRule != null) {
                     item { BikeBoardingNotice(bikeRule) }
+                }
+
+                // Baldeação: o primeiro trem da outra linha que ainda dá para pegar a pé.
+                if (transfers.isNotEmpty()) {
+                    item {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            TransferBlock(
+                                targets = transfers,
+                                nextCatchable = { transferDepartures(it, now + it.walkMinutes) },
+                                now = now,
+                                onOpen = onOpenTransfer,
+                            )
+                        }
+                    }
                 }
 
                 if (bike != null) {

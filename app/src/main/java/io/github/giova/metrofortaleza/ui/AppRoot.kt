@@ -111,6 +111,8 @@ fun AppRoot() {
     var stopId by rememberSaveable { mutableStateOf<String?>(null) }
     var showAbout by rememberSaveable { mutableStateOf(false) }
     var showSettings by rememberSaveable { mutableStateOf(false) }
+    // Sentido em que a tela de horários deve abrir (vindo de uma baldeação).
+    var openDirectionId by rememberSaveable { mutableStateOf<Int?>(null) }
 
     val routes = remember(repo) { repo.routes() }
     val bikeStations = remember(repo) { repo.bikeStations() }
@@ -391,6 +393,7 @@ fun AppRoot() {
     }
 
     fun openStation(station: Station) {
+        openDirectionId = null
         routeId = station.routeId
         stopId = station.stopId
     }
@@ -436,6 +439,21 @@ fun AppRoot() {
                     repo.stops(route.id, direction.id).dropWhile { it.id != stop.id }.drop(1)
                 },
                 onStartTrip = { direction, destination -> startTrip(route.id, direction, stop, destination) },
+                transfers = remember(stop.id) { repo.transfersFrom(stop.id) },
+                transferDepartures = { target, fromMinutes ->
+                    nextDepartures(
+                        repo.departures(target.stopId, target.routeId, target.direction.id),
+                        fromMinutes,
+                        count = 1,
+                        tomorrow = repo.departuresTomorrow(target.stopId, target.routeId, target.direction.id),
+                    ).firstOrNull()
+                },
+                onOpenTransfer = { target ->
+                    openDirectionId = target.direction.id
+                    routeId = target.routeId
+                    stopId = target.stopId
+                },
+                initialDirectionId = openDirectionId,
                 tripAllowed = remember(stop.id, route.id, homeState) {
                     repo.station(stop.id, route.id)?.let { tripAllowedFrom(it.lat, it.lon) } ?: true
                 },
@@ -458,7 +476,10 @@ fun AppRoot() {
                 route = route,
                 stops = stops,
                 onBack = { routeId = null },
-                onStopClick = { stopId = it.id },
+                onStopClick = {
+                    openDirectionId = null
+                    stopId = it.id
+                },
             )
         }
 

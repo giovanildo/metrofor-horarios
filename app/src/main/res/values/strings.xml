@@ -130,4 +130,9 @@
     <string name="settings_home_gps">Atualizar sua posição a cada</string>
     <string name="settings_home_gps_desc">Com a tela inicial aberta, de quanto em quanto tempo o app confere onde você está. Menos tempo gasta um pouco mais de bateria.</string>
     <string name="settings_reset">Restaurar padrões</string>
+    <string name="transfer_title">Integração com</string>
+    <string name="transfer_walk">%1$s · %2$d min a pé</string>
+    <string name="transfer_open">Toque para ver todos os horários de lá</string>
+    <string name="transfer_free">Integração gratuita: não paga outra passagem</string>
+    <string name="transfer_paid">Integração paga: é preciso pagar outra passagem</string>
 </resources>
