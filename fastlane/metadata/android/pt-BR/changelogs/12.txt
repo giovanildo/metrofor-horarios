@@ -1,0 +1,2 @@
+• Corrige a localização que falhava na primeira vez (antes era preciso abrir o Google Maps): o app agora encontra sua posição mais rápido, dentro de casa ou do trem.
+• Se a localização demorar, a estação aparece sozinha assim que o GPS encontrar você.
