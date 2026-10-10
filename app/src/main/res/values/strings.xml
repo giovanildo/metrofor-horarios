@@ -158,4 +158,9 @@
     <string name="trip_arrived_belongings">Você chegou a %1$s. Confira se está levando tudo.</string>
     <string name="settings_belongings">Lembrar dos pertences</string>
     <string name="settings_belongings_desc">No aviso de descida e na chegada, o app lembra de não esquecer bolsa, celular e outros pertences.</string>
+    <string name="about_copy_link">Copiar link</string>
+    <string name="about_link_copied">Link copiado</string>
+    <string name="about_share_title">Compartilhe o app</string>
+    <string name="about_share_desc">Aponte a câmera de outro celular Android para baixar o app.</string>
+    <string name="about_share_qr">QR code para baixar o app</string>
 </resources>

@@ -199,9 +199,12 @@ técnicos do GPS (precisão mínima, raio de estação) continuam fixos em
 `data/Trip.kt`, porque mexer neles exige entender o algoritmo.
 
 Um ícone de **informação** no topo abre a tela **Sobre**: o aviso de que o app
-não é oficial, de onde vêm os dados, a licença, o link do código-fonte e uma
-chave Pix para quem quiser apoiar o projeto (`PIX_KEY` em `ui/AboutScreen.kt`;
-vazia, a seção de doação some).
+não é oficial, de onde vêm os dados, a licença, o **endereço do projeto** por
+extenso (toque abre; botão "Copiar link"), um **QR code** para outra pessoa
+baixar o app apontando a câmera para a tela (`res/drawable-nodpi/qr_download.png`,
+para `releases/latest`, sempre sobre fundo branco) e uma chave Pix para quem
+quiser apoiar o projeto (`PIX_KEY` em `ui/AboutScreen.kt`; vazia, a seção de
+doação some).
 
 ## Horários do dia
 

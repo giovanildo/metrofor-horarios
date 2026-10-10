@@ -6,6 +6,17 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -97,8 +108,54 @@ fun AboutScreen(onBack: () -> Unit) {
 
             Section(R.string.about_sources_title, R.string.about_sources)
             Section(R.string.about_license_title, R.string.about_license)
-            OutlinedButton(onClick = { open(context, REPO_URL) }) {
-                Text(stringResource(R.string.about_source_code))
+            // O endereço por extenso: dá para ler, tocar para abrir ou copiar e mandar.
+            Text(
+                text = REPO_URL.removePrefix("https://"),
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.clickable { open(context, REPO_URL) },
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(onClick = { open(context, REPO_URL) }) {
+                    Text(stringResource(R.string.about_source_code))
+                }
+                OutlinedButton(onClick = { copy(context, "GitHub", REPO_URL, R.string.about_link_copied) }) {
+                    Icon(Icons.Filled.ContentCopy, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Text(stringResource(R.string.about_copy_link), modifier = Modifier.padding(start = 6.dp))
+                }
+            }
+
+            // QR da página da última versão (o mesmo dos stories; o link nunca muda):
+            // outra pessoa aponta a câmera para este celular e baixa o app.
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(
+                    text = stringResource(R.string.about_share_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                // Fundo sempre branco: no tema escuro o QR invertido não é lido.
+                Surface(
+                    color = androidx.compose.ui.graphics.Color.White,
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.padding(top = 12.dp),
+                ) {
+                    Image(
+                        bitmap = ImageBitmap.imageResource(R.drawable.qr_download),
+                        contentDescription = stringResource(R.string.about_share_qr),
+                        filterQuality = FilterQuality.None,
+                        modifier = Modifier.padding(12.dp).size(220.dp),
+                    )
+                }
+                Text(
+                    text = stringResource(R.string.about_share_desc),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
             }
 
             if (PIX_KEY.isNotBlank()) {
@@ -120,7 +177,7 @@ fun AboutScreen(onBack: () -> Unit) {
                             modifier = Modifier.padding(top = 12.dp),
                         )
                         Button(
-                            onClick = { copyPix(context) },
+                            onClick = { copy(context, "Pix", PIX_KEY, R.string.about_pix_copied) },
                             modifier = Modifier.padding(top = 8.dp),
                         ) {
                             Icon(Icons.Filled.ContentCopy, contentDescription = null)
@@ -145,10 +202,10 @@ private fun Section(title: Int, body: Int) {
     }
 }
 
-private fun copyPix(context: Context) {
+private fun copy(context: Context, label: String, text: String, toast: Int) {
     val clipboard = context.getSystemService(ClipboardManager::class.java)
-    clipboard.setPrimaryClip(ClipData.newPlainText("Pix", PIX_KEY))
-    Toast.makeText(context, R.string.about_pix_copied, Toast.LENGTH_SHORT).show()
+    clipboard.setPrimaryClip(ClipData.newPlainText(label, text))
+    Toast.makeText(context, toast, Toast.LENGTH_SHORT).show()
 }
 
 private fun open(context: Context, url: String) {
