@@ -77,3 +77,11 @@ data class TransferTarget(
     /** Se trocar de linha aqui, neste sentido, exige nova passagem. */
     val fare: TransferRule = TransferRule(TransferFare.UNKNOWN),
 )
+
+/**
+ * Como chamar o veículo da linha no texto: a Linha Sul é **metrô**; as
+ * demais (Oeste, Nordeste, Aeroporto, Sobral e Cariri) são **VLT**. O
+ * passageiro não fala "trem". Os dois são masculinos ("o metrô", "o VLT").
+ */
+fun vehicleName(routeName: String): String =
+    if (routeName.trim().equals("Linha Sul", ignoreCase = true)) "metrô" else "VLT"

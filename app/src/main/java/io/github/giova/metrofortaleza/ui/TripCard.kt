@@ -45,6 +45,7 @@ import io.github.giova.metrofortaleza.data.Stop
 import io.github.giova.metrofortaleza.data.TripFix
 import io.github.giova.metrofortaleza.data.TripPlan
 import io.github.giova.metrofortaleza.data.formatTime
+import io.github.giova.metrofortaleza.data.vehicleName
 import io.github.giova.metrofortaleza.trip.ActiveTrip
 import kotlin.math.roundToInt
 
@@ -111,6 +112,7 @@ fun TripCard(
                         R.string.trip_waiting,
                         plan.origin.name,
                         formatTime((plan.origin.scheduled + progress.delayMinutes).roundToInt()),
+                        vehicleName(plan.routeName),
                     )
                     else -> stringResource(
                         R.string.trip_progress_line,
@@ -307,6 +309,7 @@ fun TripChoiceDialog(
                         formatTime(backAt),
                         formatTime(seated.destination.scheduled),
                         extra.coerceAtLeast(0),
+                        vehicleName(seated.routeName),
                     ),
                     onClick = { onPick(seated) },
                 )

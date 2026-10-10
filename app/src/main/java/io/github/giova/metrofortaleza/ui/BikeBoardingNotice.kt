@@ -20,14 +20,14 @@ import io.github.giova.metrofortaleza.data.formatTime
 
 /** Uma linha dizendo se dá para levar a bicicleta no trem agora. */
 @Composable
-fun BikeBoardingNotice(rule: BikeBoarding, modifier: Modifier = Modifier) {
+fun BikeBoardingNotice(rule: BikeBoarding, vehicle: String, modifier: Modifier = Modifier) {
     val text = when {
         rule.allowed && rule.boundary != null ->
-            stringResource(R.string.bike_boarding_until, formatTime(rule.boundary))
-        rule.allowed -> stringResource(R.string.bike_boarding_until_close)
+            stringResource(R.string.bike_boarding_until, vehicle, formatTime(rule.boundary))
+        rule.allowed -> stringResource(R.string.bike_boarding_until_close, vehicle)
         rule.boundary != null ->
-            stringResource(R.string.bike_boarding_from, formatTime(rule.boundary))
-        else -> stringResource(R.string.bike_boarding_not_today)
+            stringResource(R.string.bike_boarding_from, vehicle, formatTime(rule.boundary))
+        else -> stringResource(R.string.bike_boarding_not_today, vehicle)
     }
     val color = if (rule.allowed) {
         MaterialTheme.colorScheme.primary

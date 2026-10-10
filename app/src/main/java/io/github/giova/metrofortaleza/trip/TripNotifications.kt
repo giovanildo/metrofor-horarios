@@ -14,6 +14,7 @@ import io.github.giova.metrofortaleza.MainActivity
 import io.github.giova.metrofortaleza.R
 import io.github.giova.metrofortaleza.data.TripFix
 import io.github.giova.metrofortaleza.data.formatTime
+import io.github.giova.metrofortaleza.data.vehicleName
 import kotlin.math.roundToInt
 
 /**
@@ -129,7 +130,7 @@ internal object TripNotifications {
         val terminal = plan.terminal ?: return ""
         // O trem não sai do terminal antes do horário: adiantamento não conta.
         val backAt = plan.stops[plan.turnaroundIndex + 1].scheduled + trip.progress.delayMinutes.coerceAtLeast(0.0)
-        val title = context.getString(R.string.trip_turnaround_title, terminal.name)
+        val title = context.getString(R.string.trip_turnaround_title, terminal.name, vehicleName(plan.routeName))
         val text = context.getString(R.string.trip_turnaround_text, formatTime(backAt.roundToInt()), plan.headsign)
         val notification = NotificationCompat.Builder(context, CHANNEL_STATION)
             .setSmallIcon(R.drawable.ic_launcher)
@@ -156,6 +157,7 @@ internal object TripNotifications {
             trip.arrived -> context.getString(R.string.trip_arrived, plan.destination.name)
             progress.index < 0 -> context.getString(
                 R.string.trip_waiting, plan.origin.name, formatTime((plan.origin.scheduled + progress.delayMinutes).roundToInt()),
+                vehicleName(plan.routeName),
             )
             else -> context.getString(
                 R.string.trip_progress_line,

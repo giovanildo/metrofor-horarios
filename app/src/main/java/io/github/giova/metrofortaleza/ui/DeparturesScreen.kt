@@ -53,6 +53,7 @@ import io.github.giova.metrofortaleza.data.TransferTarget
 import io.github.giova.metrofortaleza.data.ScheduleSource
 import io.github.giova.metrofortaleza.data.Stop
 import io.github.giova.metrofortaleza.data.formatTime
+import io.github.giova.metrofortaleza.data.vehicleName
 import io.github.giova.metrofortaleza.data.isSundayToday
 import io.github.giova.metrofortaleza.data.minutesUntil
 import io.github.giova.metrofortaleza.data.nextDepartures
@@ -224,7 +225,7 @@ fun DeparturesScreen(
                 }
 
                 if (bikeRule != null) {
-                    item { BikeBoardingNotice(bikeRule) }
+                    item { BikeBoardingNotice(bikeRule, vehicle = vehicleName(route.name)) }
                 }
 
                 // Baldeação: o primeiro trem da outra linha que ainda dá para pegar a pé.

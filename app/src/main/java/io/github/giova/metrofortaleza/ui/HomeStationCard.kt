@@ -36,6 +36,7 @@ import io.github.giova.metrofortaleza.data.bikeBoarding
 import io.github.giova.metrofortaleza.data.nowDayOfWeek
 import io.github.giova.metrofortaleza.data.Station
 import io.github.giova.metrofortaleza.data.formatTime
+import io.github.giova.metrofortaleza.data.vehicleName
 import io.github.giova.metrofortaleza.data.isSundayToday
 import io.github.giova.metrofortaleza.data.minutesUntil
 import io.github.giova.metrofortaleza.ui.theme.routeColor
@@ -208,6 +209,7 @@ private fun StationSummary(
             if (!sunday && station.routeId in BIKE_BOARDING_ROUTE_IDS) {
                 BikeBoardingNotice(
                     rule = remember(now) { bikeBoarding(nowDayOfWeek(), now) },
+                    vehicle = vehicleName(station.routeName),
                     modifier = Modifier.padding(top = 6.dp),
                 )
             }

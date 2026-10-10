@@ -8,7 +8,7 @@
 <li><b>Estação mais próxima:</b> pelo GPS, mostrando todas as linhas que passam a até 3 km de você. Ou fixe a sua estação pela estrela.</li>
 <li><b>Modo viagem:</b> escolha o destino e o app acompanha a viagem com a tela desligada, pelo GPS e, sem sinal, pela tabela de horários (avisando quando a posição é presumida). Avisa duas estações antes do destino, com som opcional e voz dizendo o nome de cada estação.</li>
 <li><b>Bicicletar:</b> a estação mais próxima de você ou da estação de metrô.</li>
-<li><b>Bike no trem:</b> diz se dá para embarcar com bicicleta agora, pelas regras do Metrofor.</li>
+<li><b>Bike no metrô e VLT:</b> diz se dá para embarcar com bicicleta agora, pelas regras do Metrofor.</li>
 <li><b>Aviso de domingo:</b> metrô e VLT normalmente não circulam aos domingos.</li>
 </ul>
 

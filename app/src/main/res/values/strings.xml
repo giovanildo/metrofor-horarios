@@ -39,10 +39,10 @@
     <string name="home_bike_from_station">Bicicletar mais próximo da estação</string>
     <string name="bike_no_realtime">Capacidade da estação, não disponibilidade agora.</string>
 
-    <string name="bike_boarding_until">Pode embarcar com bike no trem agora, até as %1$s</string>
-    <string name="bike_boarding_until_close">Pode embarcar com bike no trem agora, até o fim da operação</string>
-    <string name="bike_boarding_from">Bike no trem só a partir das %1$s</string>
-    <string name="bike_boarding_not_today">Hoje não há horário para embarcar com bike no trem</string>
+    <string name="bike_boarding_until">Pode embarcar com bike no %1$s agora, até as %2$s</string>
+    <string name="bike_boarding_until_close">Pode embarcar com bike no %1$s agora, até o fim da operação</string>
+    <string name="bike_boarding_from">Bike no %1$s só a partir das %2$s</string>
+    <string name="bike_boarding_not_today">Hoje não há horário para embarcar com bike no %1$s</string>
 
     <string name="sunday_warning">Aos domingos o metrô e os VLTs normalmente não circulam. Em dias de operação especial (eleição, ENEM, eventos), os horários podem ser diferentes destes.</string>
 
@@ -62,7 +62,7 @@
     <string name="trip_channel_alert_sound">Aviso de chegada (com som)</string>
     <string name="trip_channel_alert_silent">Aviso de chegada (sem som)</string>
     <string name="trip_notification_title">Viagem até %1$s</string>
-    <string name="trip_waiting">Aguardando o trem em %1$s, previsto às %2$s.</string>
+    <string name="trip_waiting">Aguardando o %3$s em %1$s, previsto às %2$s.</string>
     <string name="trip_progress_line">Em %1$s · destino em %2$s · chegada ~%3$s (%4$s)</string>
     <string name="trip_fix_gps">pelo GPS</string>
     <string name="trip_fix_schedule">presumida pela tabela de horários</string>
@@ -97,7 +97,7 @@
     <string name="about_version">Versão %1$s</string>
     <string name="about_unofficial">Este app NÃO é oficial e não tem ligação com o Metrofor nem com o Governo do Ceará. Os horários são os publicados pelo Metrofor e podem não refletir atrasos ou mudanças de última hora. Em caso de dúvida, confira os canais oficiais.</string>
     <string name="about_sources_title">De onde vêm os dados</string>
-    <string name="about_sources">• Horários e estações: GTFS público do Metrofor (info.metrofor.ce.gov.br), baixado uma vez por dia.\n• Estações do Bicicletar: dados abertos da Prefeitura de Fortaleza (AMC).\n• Regras de bicicleta no trem: regulamento "Bike é bem-vinda no metrô" do Metrofor.</string>
+    <string name="about_sources">• Horários e estações: GTFS público do Metrofor (info.metrofor.ce.gov.br), baixado uma vez por dia.\n• Estações do Bicicletar: dados abertos da Prefeitura de Fortaleza (AMC).\n• Regras de bicicleta no metrô e VLT: regulamento "Bike é bem-vinda no metrô" do Metrofor.</string>
     <string name="about_license_title">Licença</string>
     <string name="about_license">Software livre, sob a GNU GPL versão 3. O código-fonte está no GitHub.</string>
     <string name="about_source_code">Ver o código-fonte</string>
@@ -123,8 +123,8 @@
     <string name="settings_trip_max_desc">Longe assim de qualquer estação, a opção de modo viagem não aparece.</string>
     <string name="settings_gps_lost">Considerar o GPS perdido depois de</string>
     <string name="settings_gps_lost_desc">Sem sinal de GPS por esse tempo, o app avisa que a posição está sendo calculada pela tabela de horários.</string>
-    <string name="settings_late_boarding">Contar o trem que saiu há até</string>
-    <string name="settings_late_boarding_desc">Se você começar a viagem já dentro do trem, o app ainda considera o trem que saiu da estação até esse tempo atrás.</string>
+    <string name="settings_late_boarding">Contar o metrô ou VLT que saiu há até</string>
+    <string name="settings_late_boarding_desc">Se você começar a viagem já embarcado, o app ainda considera o metrô ou VLT que saiu da estação até esse tempo atrás.</string>
     <string name="settings_give_up">Encerrar a viagem sozinho depois de</string>
     <string name="settings_give_up_desc">Se passar esse tempo da chegada prevista sem você chegar ao destino, a viagem é encerrada.</string>
     <string name="settings_home_gps">Atualizar sua posição a cada</string>
@@ -136,14 +136,14 @@
     <string name="transfer_free">Integração gratuita: não paga outra passagem</string>
     <string name="transfer_paid">Integração paga: é preciso pagar outra passagem</string>
     <string name="settings_seated">Oferecer ir sentado pelo terminal até</string>
-    <string name="settings_seated_desc">Se você estiver perto de um terminal e for no sentido contrário, o modo viagem oferece ir até o terminal e voltar sentado no mesmo trem. Leva um pouco mais de tempo.</string>
+    <string name="settings_seated_desc">Se você estiver perto de um terminal e for no sentido contrário, o modo viagem oferece ir até o terminal e voltar sentado no mesmo metrô ou VLT. Leva um pouco mais de tempo.</string>
     <string name="trip_choice_title">Como você quer ir?</string>
     <string name="trip_choice_direct">Direto</string>
     <string name="trip_choice_direct_desc">Embarca aqui às %1$s e chega às %2$s.</string>
     <string name="trip_choice_seated">Sentado, pelo terminal %1$s</string>
-    <string name="trip_choice_seated_desc">Embarca às %1$s no sentido %2$s, fica no trem e volta às %3$s. Chega às %4$s (+%5$d min).</string>
-    <string name="trip_choice_note">O app não sabe a lotação dos trens. Perto do terminal, no horário de pico, costuma valer a pena.</string>
+    <string name="trip_choice_seated_desc">Embarca às %1$s no sentido %2$s, fica no %6$s e volta às %3$s. Chega às %4$s (+%5$d min).</string>
+    <string name="trip_choice_note">O app não sabe a lotação. Perto do terminal, no horário de pico, costuma valer a pena.</string>
     <string name="trip_via_terminal">indo sentado, pelo terminal %1$s</string>
-    <string name="trip_turnaround_title">%1$s: fique no trem</string>
+    <string name="trip_turnaround_title">%1$s: fique no %2$s</string>
     <string name="trip_turnaround_text">Ele volta às %1$s no sentido %2$s.</string>
 </resources>
